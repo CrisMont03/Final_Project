@@ -12,9 +12,16 @@ struct ContentView: View {
 
     var body: some View {
         if authViewModel.userIsLoggedIn {
-            HomeView()
+            if authViewModel.isDoctor {
+                DoctorView()
+                    .environmentObject(authViewModel)
+            } else {
+                PatientView()
+                    .environmentObject(authViewModel)
+            }
         } else {
             LoginView()
+                .environmentObject(authViewModel)
         }
     }
 }
