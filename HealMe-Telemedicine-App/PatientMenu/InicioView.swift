@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftUICharts // Importar SwiftUICharts
 import FirebaseAuth
 
 struct InicioView: View {
@@ -18,15 +19,59 @@ struct InicioView: View {
         background: Color(hex: "F5F6F9")
     )
     
+    // Datos para el gráfico
+    private var chartData: [(String, Double)] {
+        let weight = authViewModel.patientMedicalHistory["weight"] as? Double ?? 0
+        let height = authViewModel.patientMedicalHistory["height"] as? Double ?? 0
+        return [
+            ("Peso (kg)", weight),
+            ("Altura (cm)", height)
+        ]
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
-            Text("Bienvenido, Paciente")
+            // Encabezado de bienvenida
+            Text("Bienvenido, \(authViewModel.patientName.isEmpty ? "Paciente" : authViewModel.patientName)")
                 .font(.system(size: 32, weight: .semibold, design: .rounded))
                 .foregroundColor(.primary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
             
-            Text("Este es tu panel de inicio")
+            Text("Tu resumen médico")
                 .font(.system(size: 16, weight: .light, design: .rounded))
                 .foregroundColor(.primary)
+            
+            // Gráfico de barras con SwiftUICharts
+            if !chartData.allSatisfy({ $0.1 == 0 }) {
+                BarChartView(
+                    data: ChartData(values: chartData),
+                    title: "Datos Médicos",
+                    style: ChartStyle(
+                        backgroundColor: Color.white,
+                        accentColor: colors.blue,
+                        gradientColor: GradientColor(start: colors.blue, end: colors.blue.opacity(0.6)),
+                        textColor: .primary,
+                        legendTextColor: .primary,
+                        dropShadowColor: .gray
+                    ),
+                    form: CGSize(width: 300, height: 200)
+                )
+                .padding()
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .padding(.horizontal, 24)
+            } else {
+                Text("Cargando datos médicos...")
+                    .font(.system(size: 16, weight: .light, design: .rounded))
+                    .foregroundColor(.primary)
+            }
+            
+            Spacer()
             
             Button(action: {
                 try? Auth.auth().signOut()

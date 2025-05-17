@@ -14,7 +14,9 @@ class AuthViewModel: ObservableObject {
     @Published var userIsLoggedIn: Bool = false
     @Published var isDoctor: Bool = false
     @Published var doctorData: [String: Any]? = nil
-    @Published var isPatientRegistrationComplete: Bool = false // Nueva propiedad
+    @Published var isPatientRegistrationComplete: Bool = false
+    @Published var patientName: String = "" // Nuevo: Nombre del paciente
+    @Published var patientMedicalHistory: [String: Any] = [:] // Nuevo: Historial médico
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private let db = Firestore.firestore()
 
@@ -29,16 +31,18 @@ class AuthViewModel: ObservableObject {
                 print("Es médico: \(self.isDoctor)")
                 if self.isDoctor {
                     self.fetchDoctorData(email: email)
-                    self.isPatientRegistrationComplete = true // Médicos no necesitan registro adicional
+                    self.isPatientRegistrationComplete = true
                 } else {
                     self.doctorData = nil
-                    // Verificar si el paciente ha completado el registro
                     self.checkPatientRegistration(userId: user.uid)
+                    self.fetchPatientData(userId: user.uid) // Nuevo: Obtener datos del paciente
                 }
             } else {
                 self.isDoctor = false
                 self.doctorData = nil
                 self.isPatientRegistrationComplete = false
+                self.patientName = ""
+                self.patientMedicalHistory = [:]
             }
         }
     }
@@ -66,10 +70,10 @@ class AuthViewModel: ObservableObject {
                 completion(false)
                 return
             }
-            // Guardar datos del paciente en Firestore
             let patientData: [String: Any] = [
                 "email": email,
                 "name": name,
+
                 "createdAt": Timestamp()
             ]
             self.db.collection("patients").document(user.uid).setData(patientData) { error in
@@ -79,7 +83,8 @@ class AuthViewModel: ObservableObject {
                     return
                 }
                 self.errorMessage = ""
-                self.isPatientRegistrationComplete = false // Registro inicial, pero falta historial médico
+                self.patientName = name // Actualizar nombre
+                self.isPatientRegistrationComplete = false
                 completion(true)
             }
         }
@@ -105,7 +110,8 @@ class AuthViewModel: ObservableObject {
                 return
             }
             self.errorMessage = ""
-            self.isPatientRegistrationComplete = true // Registro completo
+            self.patientMedicalHistory = medicalHistory // Actualizar historial
+            self.isPatientRegistrationComplete = true
             completion(true)
         }
     }
@@ -119,10 +125,29 @@ class AuthViewModel: ObservableObject {
                 return
             }
             if let data = snapshot?.data(), data["age"] != nil {
-                self.isPatientRegistrationComplete = true // Historial médico presente
+                self.isPatientRegistrationComplete = true
             } else {
                 self.isPatientRegistrationComplete = false
             }
+        }
+    }
+
+    private func fetchPatientData(userId: String) {
+        db.collection("patients").document(userId).getDocument { [weak self] snapshot, error in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error al obtener datos del paciente: \(error.localizedDescription)")
+                self.errorMessage = "Error al cargar datos del paciente"
+                return
+            }
+            guard let data = snapshot?.data() else {
+                print("No se encontraron datos para el paciente: \(userId)")
+                self.errorMessage = "No se encontraron datos del paciente"
+                return
+            }
+            self.patientName = data["name"] as? String ?? ""
+            self.patientMedicalHistory = data
+            print("Datos del paciente cargados: \(data)")
         }
     }
 
@@ -134,7 +159,7 @@ class AuthViewModel: ObservableObject {
                 guard let self = self else { return }
                 if let error = error {
                     print("Error al buscar datos del médico: \(error.localizedDescription)")
-                    self.errorMessage = "Error al buscar datos del médico: \(error.localizedDescription)"
+                    self.errorMessage = "Error al buscar datos del médico"
                     self.doctorData = nil
                     return
                 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7A89B2262DD89B36006B0241 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 7A89B2252DD89B36006B0241 /* SwiftUICharts */; };
 		7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */; };
 		7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CE2DD80CCE00BED0F7 /* FirebaseCore */; };
 		7AE116D12DD80CCE00BED0F7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D02DD80CCE00BED0F7 /* FirebaseDatabase */; };
@@ -38,6 +39,7 @@
 				7AE116D52DD80CCE00BED0F7 /* FirebaseFunctions in Frameworks */,
 				7AE116D72DD80CCE00BED0F7 /* FirebaseRemoteConfig in Frameworks */,
 				7AE116D92DD80CCE00BED0F7 /* FirebaseStorage in Frameworks */,
+				7A89B2262DD89B36006B0241 /* SwiftUICharts in Frameworks */,
 				7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */,
 				7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */,
 			);
@@ -89,6 +91,7 @@
 				7AE116D42DD80CCE00BED0F7 /* FirebaseFunctions */,
 				7AE116D62DD80CCE00BED0F7 /* FirebaseRemoteConfig */,
 				7AE116D82DD80CCE00BED0F7 /* FirebaseStorage */,
+				7A89B2252DD89B36006B0241 /* SwiftUICharts */,
 			);
 			productName = "HealMe-Telemedicine-App";
 			productReference = 7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */;
@@ -120,6 +123,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				7A89B2242DD89B36006B0241 /* XCRemoteSwiftPackageReference "ChartView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7AE116BA2DD8053E00BED0F7 /* Products */;
@@ -355,6 +359,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7A89B2242DD89B36006B0241 /* XCRemoteSwiftPackageReference "ChartView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppPear/ChartView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.5;
+			};
+		};
 		7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -366,6 +378,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7A89B2252DD89B36006B0241 /* SwiftUICharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A89B2242DD89B36006B0241 /* XCRemoteSwiftPackageReference "ChartView" */;
+			productName = SwiftUICharts;
+		};
 		7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
