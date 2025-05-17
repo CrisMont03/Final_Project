@@ -15,8 +15,11 @@ struct ContentView: View {
             if authViewModel.isDoctor {
                 DoctorView()
                     .environmentObject(authViewModel)
-            } else {
+            } else if authViewModel.isPatientRegistrationComplete {
                 PatientView()
+                    .environmentObject(authViewModel)
+            } else {
+                LoginView()
                     .environmentObject(authViewModel)
             }
         } else {
@@ -29,5 +32,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(AuthViewModel())
     }
 }

@@ -20,83 +20,87 @@ struct LoginView: View {
     )
 
     var body: some View {
-        ZStack {
-            colors.background
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                colors.background
+                    .ignoresSafeArea()
 
-            VStack(alignment: .center, spacing: 24) {
-                
-                VStack(alignment: .center, spacing: 5) {
-                    Text("Bienvenido")
-                        .font(.system(size: 32, weight: .semibold, design: .rounded))
-                        .foregroundColor(.primary)
-                    Text("Inicia sesión y accede a tu cuenta:")
-                        .font(.system(size: 16, weight: .light, design: .rounded))
-                        .foregroundColor(.primary)
-                }
-
-                TextField("Correo", text: $email)
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
-                    .autocapitalization(.none)
-                    .keyboardType(.emailAddress)
-                    .textContentType(.emailAddress)
-
-                SecureField("Contraseña", text: $password)
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
-                    .textContentType(.password)
-
-                if !authViewModel.errorMessage.isEmpty {
-                    Text(authViewModel.errorMessage)
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(colors.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                Button(action: {
-                    if email.isEmpty || password.isEmpty {
-                        authViewModel.errorMessage = "Por favor, completa todos los campos"
-                    } else {
-                        authViewModel.signIn(email: email, password: password)
+                VStack(alignment: .center, spacing: 24) {
+                    VStack(alignment: .center, spacing: 5) {
+                        Text("Bienvenido")
+                            .font(.system(size: 32, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primary)
+                        Text("Inicia sesión y accede a tu cuenta:")
+                            .font(.system(size: 16, weight: .light, design: .rounded))
+                            .foregroundColor(.primary)
                     }
-                }) {
-                    Text("Iniciar Sesión")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .frame(maxWidth: .infinity)
+
+                    TextField("Correo", text: $email)
                         .padding()
-                        .background(colors.green)
-                        .foregroundColor(.white)
+                        .background(Color.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        )
+                        .autocapitalization(.none)
+                        .keyboardType(.emailAddress)
+                        .textContentType(.emailAddress)
 
-                HStack(spacing: 0) {
-                    Text("¿No tienes una cuenta? ")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.primary)
-                    
-                    Text("Regístrate")
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                        .foregroundColor(colors.blue)
-                        .onTapGesture {
-                            authViewModel.signUp(email: email, password: password)
+                    SecureField("Contraseña", text: $password)
+                        .padding()
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        )
+                        .textContentType(.password)
+
+                    if !authViewModel.errorMessage.isEmpty {
+                        Text(authViewModel.errorMessage)
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(colors.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+
+                    Button(action: {
+                        if email.isEmpty || password.isEmpty {
+                            authViewModel.errorMessage = "Por favor, completa todos los campos"
+                        } else {
+                            authViewModel.signIn(email: email, password: password)
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         }
-                }
+                    }) {
+                        Text("Iniciar Sesión")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(colors.green)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
 
+                    HStack(spacing: 0) {
+                        Text("¿No tienes una cuenta? ")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(.primary)
+                        
+                        NavigationLink {
+                            RegisterView()
+                                .environmentObject(authViewModel)
+                        } label: {
+                            Text("Regístrate")
+                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                                .foregroundColor(colors.blue)
+                        }
+                    }
+                }
+                .padding(.horizontal, 24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(.horizontal, 24)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationBarHidden(true)
         }
     }
 }
@@ -131,5 +135,6 @@ extension Color {
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView()
+            .environmentObject(AuthViewModel())
     }
 }
