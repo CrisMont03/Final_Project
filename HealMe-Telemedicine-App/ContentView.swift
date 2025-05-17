@@ -8,17 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var authViewModel = AuthViewModel()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if authViewModel.userIsLoggedIn {
+            if authViewModel.isDoctor {
+                DoctorView()
+                    .environmentObject(authViewModel)
+            } else if authViewModel.isPatientRegistrationComplete {
+                
+                PatientMenuView() // Cambiado de PatientView a PatientMenuView
+                    .environmentObject(authViewModel)
+            } else {
+                LoginView()
+                    .environmentObject(authViewModel)
+            }
+        } else {
+            LoginView()
+                .environmentObject(authViewModel)
         }
-        .padding()
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .environmentObject(AuthViewModel())
+    }
 }
