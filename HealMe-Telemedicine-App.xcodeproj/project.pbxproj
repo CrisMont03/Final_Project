@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */; };
+		7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CE2DD80CCE00BED0F7 /* FirebaseCore */; };
+		7AE116D12DD80CCE00BED0F7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D02DD80CCE00BED0F7 /* FirebaseDatabase */; };
+		7AE116D32DD80CCE00BED0F7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D22DD80CCE00BED0F7 /* FirebaseFirestore */; };
+		7AE116D52DD80CCE00BED0F7 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D42DD80CCE00BED0F7 /* FirebaseFunctions */; };
+		7AE116D72DD80CCE00BED0F7 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D62DD80CCE00BED0F7 /* FirebaseRemoteConfig */; };
+		7AE116D92DD80CCE00BED0F7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D82DD80CCE00BED0F7 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HealMe-Telemedicine-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +33,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7AE116D12DD80CCE00BED0F7 /* FirebaseDatabase in Frameworks */,
+				7AE116D32DD80CCE00BED0F7 /* FirebaseFirestore in Frameworks */,
+				7AE116D52DD80CCE00BED0F7 /* FirebaseFunctions in Frameworks */,
+				7AE116D72DD80CCE00BED0F7 /* FirebaseRemoteConfig in Frameworks */,
+				7AE116D92DD80CCE00BED0F7 /* FirebaseStorage in Frameworks */,
+				7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */,
+				7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +82,13 @@
 			);
 			name = "HealMe-Telemedicine-App";
 			packageProductDependencies = (
+				7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */,
+				7AE116CE2DD80CCE00BED0F7 /* FirebaseCore */,
+				7AE116D02DD80CCE00BED0F7 /* FirebaseDatabase */,
+				7AE116D22DD80CCE00BED0F7 /* FirebaseFirestore */,
+				7AE116D42DD80CCE00BED0F7 /* FirebaseFunctions */,
+				7AE116D62DD80CCE00BED0F7 /* FirebaseRemoteConfig */,
+				7AE116D82DD80CCE00BED0F7 /* FirebaseStorage */,
 			);
 			productName = "HealMe-Telemedicine-App";
 			productReference = 7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */;
@@ -94,6 +118,9 @@
 			);
 			mainGroup = 7AE116B02DD8053E00BED0F7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7AE116BA2DD8053E00BED0F7 /* Products */;
 			projectDirPath = "";
@@ -256,6 +283,7 @@
 				DEVELOPMENT_TEAM = WD8Y64YFTF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = HealMe;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +312,7 @@
 				DEVELOPMENT_TEAM = WD8Y64YFTF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = HealMe;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -324,6 +353,55 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.12.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		7AE116CE2DD80CCE00BED0F7 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		7AE116D02DD80CCE00BED0F7 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		7AE116D22DD80CCE00BED0F7 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		7AE116D42DD80CCE00BED0F7 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		7AE116D62DD80CCE00BED0F7 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+		7AE116D82DD80CCE00BED0F7 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7AE116B12DD8053E00BED0F7 /* Project object */;
 }
