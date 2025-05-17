@@ -53,7 +53,7 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func signUpPatient(email: String, password: String, name: String, idNumber: String, phone: String, completion: @escaping (Bool) -> Void) {
+    func signUpPatient(email: String, password: String, name: String, completion: @escaping (Bool) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
             guard let self = self else { return }
             if let error = error {
@@ -70,8 +70,6 @@ class AuthViewModel: ObservableObject {
             let patientData: [String: Any] = [
                 "email": email,
                 "name": name,
-                "idNumber": idNumber,
-                "phone": phone,
                 "createdAt": Timestamp()
             ]
             self.db.collection("patients").document(user.uid).setData(patientData) { error in
@@ -87,7 +85,7 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func updateMedicalHistory(userId: String, age: Int, gender: String, weight: Double, height: Double, bloodType: String, diet: String, exercise: String, allergies: String, medicalCondition: String, completion: @escaping (Bool) -> Void) {
+    func updateMedicalHistory(userId: String, age: Int, gender: String, weight: Double, height: Double, bloodType: String, diet: String, exercise: String, allergies: String, completion: @escaping (Bool) -> Void) {
         let medicalHistory: [String: Any] = [
             "age": age,
             "gender": gender,
@@ -97,7 +95,6 @@ class AuthViewModel: ObservableObject {
             "diet": diet,
             "exercise": exercise,
             "allergies": allergies,
-            "medicalCondition": medicalCondition,
             "updatedAt": Timestamp()
         ]
         db.collection("patients").document(userId).updateData(medicalHistory) { [weak self] error in

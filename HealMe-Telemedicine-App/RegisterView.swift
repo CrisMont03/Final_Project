@@ -9,10 +9,9 @@ import SwiftUI
 
 struct RegisterView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.dismiss) var dismiss // Añadido para regresar a la vista anterior
     @State private var name: String = ""
     @State private var email: String = ""
-    @State private var idNumber: String = ""
-    @State private var phone: String = ""
     @State private var password: String = ""
     @State private var navigateToMedicalHistory: Bool = false
 
@@ -60,28 +59,6 @@ struct RegisterView: View {
                     .keyboardType(.emailAddress)
                     .textContentType(.emailAddress)
 
-                TextField("Cédula", text: $idNumber)
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
-                    .keyboardType(.numberPad)
-                    .textContentType(.none)
-
-                TextField("Teléfono", text: $phone)
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
-                    .keyboardType(.phonePad)
-                    .textContentType(.telephoneNumber)
-
                 SecureField("Contraseña", text: $password)
                     .padding()
                     .background(Color.white)
@@ -101,12 +78,12 @@ struct RegisterView: View {
                 }
 
                 Button(action: {
-                    if name.isEmpty || email.isEmpty || idNumber.isEmpty || phone.isEmpty || password.isEmpty {
+                    if name.isEmpty || email.isEmpty || password.isEmpty {
                         authViewModel.errorMessage = "Por favor, completa todos los campos"
                     } else if email.hasSuffix("@healme.doc.co") {
                         authViewModel.errorMessage = "Este correo está reservado para médicos"
                     } else {
-                        authViewModel.signUpPatient(email: email, password: password, name: name, idNumber: idNumber, phone: phone) { success in
+                        authViewModel.signUpPatient(email: email, password: password, name: name) { success in
                             if success {
                                 navigateToMedicalHistory = true
                             }
@@ -122,13 +99,29 @@ struct RegisterView: View {
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+
+                // Nuevo enlace para regresar a LoginView
+                HStack(spacing: 0) {
+                    Text("¿Ya tienes una cuenta? ")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.primary)
+                    
+                    Text("Inicia sesión")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(colors.blue)
+                        .onTapGesture {
+                            dismiss() // Regresa a la vista anterior (LoginView)
+                        }
+                }
+
+                // Navegación a RegisterMedicalHistoryView
+                .navigationDestination(isPresented: $navigateToMedicalHistory) {
+                    RegisterMedicalHistoryView()
+                        .environmentObject(authViewModel)
+                }
             }
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .navigationDestination(isPresented: $navigateToMedicalHistory) {
-                RegisterMedicalHistoryView()
-                    .environmentObject(authViewModel)
-            }
         }
         .navigationBarHidden(true)
     }
