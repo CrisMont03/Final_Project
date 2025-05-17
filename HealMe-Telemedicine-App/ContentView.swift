@@ -16,7 +16,8 @@ struct ContentView: View {
                 DoctorView()
                     .environmentObject(authViewModel)
             } else if authViewModel.isPatientRegistrationComplete {
-                PatientView()
+                
+                PatientMenuView() // Cambiado de PatientView a PatientMenuView
                     .environmentObject(authViewModel)
             } else {
                 LoginView()
