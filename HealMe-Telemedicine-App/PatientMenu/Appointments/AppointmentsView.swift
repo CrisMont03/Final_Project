@@ -81,13 +81,17 @@ struct AppointmentsView: View {
                     Button(action: {
                         isShowingForm = true
                     }) {
-                        Text("Agendar cita")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(colors.green)
-                            .foregroundColor(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        HStack(spacing: 8) {
+                            Image(systemName: "calendar.badge.plus")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("Agendar cita")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(colors.green)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
@@ -148,27 +152,38 @@ struct AppointmentsView: View {
 
         var body: some View {
             VStack(alignment: .leading, spacing: 8) {
-                Text(appointment.doctorName)
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(.black)
-                Text("Especialidad: \(appointment.specialty)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.gray)
-                Text("Fecha: \(appointment.date) a las \(appointment.hour)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.gray)
+                HStack {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(colors.blue)
+                    Text("Dr. \(appointment.doctorName)")
+                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                        .foregroundColor(.black)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Especialidad: \(appointment.specialty)")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.gray)
+                    Text("Fecha: \(appointment.date) - \(appointment.hour)")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.blue)
+                }
                 Button(action: {
                     if let url = URL(string: "https://videocall.healme.com/\(appointment.doctorId)") {
                         UIApplication.shared.open(url)
                     }
                 }) {
-                    Text("Unirse a videollamada")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .frame(maxWidth: .infinity)
-                        .padding(8)
-                        .background(colors.blue)
-                        .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    HStack(spacing: 8) {
+                        Image(systemName: "video.fill")
+                            .font(.system(size: 14, weight: .medium))
+                        Text("Unirse a videollamada")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(8)
+                    .background(colors.blue)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
             .padding(12)

@@ -21,9 +21,22 @@
 		7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HealMe-Telemedicine-App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		7A8BA1752DDA3AF50077C7B8 /* Exceptions for "HealMe-Telemedicine-App" folder in "HealMe-Telemedicine-App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 7AE116B82DD8053E00BED0F7 /* HealMe-Telemedicine-App */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7AE116BB2DD8053E00BED0F7 /* HealMe-Telemedicine-App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				7A8BA1752DDA3AF50077C7B8 /* Exceptions for "HealMe-Telemedicine-App" folder in "HealMe-Telemedicine-App" target */,
+			);
 			path = "HealMe-Telemedicine-App";
 			sourceTree = "<group>";
 		};
@@ -287,6 +300,7 @@
 				DEVELOPMENT_TEAM = WD8Y64YFTF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "HealMe-Telemedicine-App/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = HealMe;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -316,6 +330,7 @@
 				DEVELOPMENT_TEAM = WD8Y64YFTF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "HealMe-Telemedicine-App/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = HealMe;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
