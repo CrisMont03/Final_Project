@@ -12,6 +12,7 @@ struct ContentView: View {
 
     var body: some View {
         if authViewModel.userIsLoggedIn {
+            
             if authViewModel.isDoctor {
                 DoctorView()
                     .environmentObject(authViewModel)

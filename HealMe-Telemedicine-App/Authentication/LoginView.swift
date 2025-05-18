@@ -11,6 +11,7 @@ struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var isLoading: Bool = false // Nuevo: para manejar el estado de carga
 
     private let colors = (
         red: Color(hex: "D40035"),
@@ -29,33 +30,43 @@ struct LoginView: View {
                     VStack(alignment: .center, spacing: 5) {
                         Text("Bienvenido")
                             .font(.system(size: 32, weight: .semibold, design: .rounded))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.black)
                         Text("Inicia sesión y accede a tu cuenta:")
                             .font(.system(size: 16, weight: .light, design: .rounded))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.black)
                     }
 
-                    TextField("Correo", text: $email)
-                        .padding()
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
-                        .autocapitalization(.none)
-                        .keyboardType(.emailAddress)
-                        .textContentType(.emailAddress)
+                    TextField(
+                        "",
+                        text: $email,
+                        prompt: Text("Correo").foregroundColor(.black.opacity(0.5))
+                    )
+                    .foregroundColor(.black)
+                    .padding()
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
+                    )
+                    .autocapitalization(.none)
+                    .keyboardType(.emailAddress)
+                    .textContentType(.emailAddress)
 
-                    SecureField("Contraseña", text: $password)
-                        .padding()
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
-                        .textContentType(.password)
+                    SecureField(
+                        "",
+                        text: $password,
+                        prompt: Text("Contraseña").foregroundColor(.black.opacity(0.5))
+                    )
+                    .foregroundColor(.black)
+                    .padding()
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
+                    )
+                    .textContentType(.password)
 
                     if !authViewModel.errorMessage.isEmpty {
                         Text(authViewModel.errorMessage)
@@ -66,26 +77,31 @@ struct LoginView: View {
                     }
 
                     Button(action: {
+                        guard !isLoading else { return }
                         if email.isEmpty || password.isEmpty {
                             authViewModel.errorMessage = "Por favor, completa todos los campos"
                         } else {
+                            isLoading = true
+                            print("Attempting to sign in with email: \(email)")
                             authViewModel.signIn(email: email, password: password)
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            isLoading = false
                         }
                     }) {
-                        Text("Iniciar Sesión")
+                        Text(isLoading ? "Iniciando..." : "Iniciar Sesión")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(colors.green)
+                            .background(isLoading ? colors.green.opacity(0.5) : colors.green)
                             .foregroundColor(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .disabled(isLoading)
 
                     HStack(spacing: 0) {
                         Text("¿No tienes una cuenta? ")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.black)
                         
                         NavigationLink {
                             RegisterView()
@@ -99,13 +115,37 @@ struct LoginView: View {
                 }
                 .padding(.horizontal, 24)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Redirección basada en el estado de autenticación
+                .navigationDestination(isPresented: $authViewModel.userIsLoggedIn) {
+                    if authViewModel.isDoctor {
+                        DoctorView() // Asegúrate de tener esta vista
+                            .environmentObject(authViewModel)
+                    } else if authViewModel.isPatientRegistrationComplete {
+                        InicioView() // Asegúrate de tener esta vista
+                            .environmentObject(authViewModel)
+                    } else {
+                        RegisterMedicalHistoryView()
+                            .environmentObject(authViewModel)
+                    }
+                }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                print("LoginView appeared, clearing errorMessage")
+                authViewModel.errorMessage = ""
+            }
         }
     }
 }
 
-// Extension to support hex colors
+struct LoginView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoginView()
+            .environmentObject(AuthViewModel())
+    }
+}
+
+// Extensión para colores hexadecimales (ya incluida en el código original)
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -129,12 +169,5 @@ extension Color {
             blue: Double(b) / 255,
             opacity: Double(a) / 255
         )
-    }
-}
-
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView()
-            .environmentObject(AuthViewModel())
     }
 }
