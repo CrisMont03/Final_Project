@@ -105,12 +105,11 @@ struct InicioView: View {
                 // Encabezado de bienvenida
                 Text("Bienvenido, \(authViewModel.patientName.isEmpty ? "Paciente" : authViewModel.patientName)")
                     .font(.system(size: 28, weight: .medium, design: .rounded))
-                    .foregroundColor(.primary)
-                    .padding(.top, 16)
+                    .foregroundColor(.black)
                 
                 Text("Tu resumen médico")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.gray)
                 
                 // Tarjeta: Gráfico de barras (Resumen Vital)
                 if isDataLoaded && !barChartData.isEmpty {
@@ -127,7 +126,19 @@ struct InicioView: View {
                                 .annotation(position: .top) {
                                     Text(String(format: "%.1f", data.value))
                                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.gray) // Cambiado a gris para medidas
+                                }
+                            }
+                            .chartXAxis {
+                                AxisMarks { _ in
+                                    AxisValueLabel()
+                                        .foregroundStyle(.black) // Etiquetas del eje X en negro
+                                }
+                            }
+                            .chartYAxis {
+                                AxisMarks { _ in
+                                    AxisValueLabel()
+                                        .foregroundStyle(.black) // Etiquetas del eje Y en negro
                                 }
                             }
                             .frame(height: 180)
@@ -140,7 +151,7 @@ struct InicioView: View {
                         chart: {
                             Text("Cargando datos...")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.gray)
                         }
                     )
                 }
@@ -162,7 +173,19 @@ struct InicioView: View {
                                 .annotation(position: .top) {
                                     Text(String(format: "%.1f", data.value))
                                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.gray) // Cambiado a gris para medidas
+                                }
+                            }
+                            .chartXAxis {
+                                AxisMarks { _ in
+                                    AxisValueLabel()
+                                        .foregroundStyle(.black) // Etiquetas del eje X en negro
+                                }
+                            }
+                            .chartYAxis {
+                                AxisMarks { _ in
+                                    AxisValueLabel()
+                                        .foregroundStyle(.black) // Etiquetas del eje Y en negro
                                 }
                             }
                             .frame(height: 180)
@@ -175,7 +198,7 @@ struct InicioView: View {
                         chart: {
                             Text("Cargando datos...")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.gray)
                         }
                     )
                 }
@@ -195,7 +218,7 @@ struct InicioView: View {
                                 .annotation(position: .trailing) {
                                     Text(data.type)
                                         .font(.system(size: 12, weight: .medium, design: .rounded))
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(.black) // Categorías en negro
                                 }
                             }
                             .chartForegroundStyleScale([
@@ -203,8 +226,21 @@ struct InicioView: View {
                                 "A veces": colors.blue.opacity(0.7),
                                 "Frecuente": colors.blue.opacity(0.4)
                             ])
+                            .chartXAxis {
+                                AxisMarks { _ in
+                                    AxisValueLabel()
+                                        .foregroundStyle(.black) // Etiquetas del eje X en negro
+                                }
+                            }
+                            .chartYAxis {
+                                AxisMarks { _ in
+                                    AxisValueLabel()
+                                        .foregroundStyle(.black) // Etiquetas del eje Y en negro
+                                }
+                            }
                             .frame(height: 100)
                             .padding(.top, 12)
+                            .foregroundColor(.gray)
                         }
                     )
                 } else {
@@ -214,30 +250,13 @@ struct InicioView: View {
                         chart: {
                             Text("Cargando datos...")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.gray)
                         }
                     )
                 }
-                
-                // Botón Cerrar Sesión
-                Button(action: {
-                    try? Auth.auth().signOut()
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.right.square")
-                        Text("Cerrar Sesión")
-                    }
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(colors.red.opacity(0.1))
-                    .foregroundColor(colors.red)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
             }
             .frame(maxWidth: .infinity)
+            .padding(.top, 35)
         }
         .background(colors.background)
         .navigationBarHidden(true)
@@ -263,7 +282,8 @@ struct ChartCardView<Content: View>: View {
     
     private let colors = (
         blue: Color(hex: "007AFE"),
-        background: Color(hex: "F5F6F9")
+        background: Color(hex: "F5F6F9"),
+        green: Color(hex: "28A745")
     )
     
     var body: some View {
@@ -271,10 +291,10 @@ struct ChartCardView<Content: View>: View {
             HStack {
                 Image(systemName: icon)
                     .font(.system(size: 16))
-                    .foregroundColor(colors.blue)
+                    .foregroundColor(colors.green)
                 Text(title)
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
                 Spacer()
             }
             chart()
@@ -284,7 +304,7 @@ struct ChartCardView<Content: View>: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
         )
         .padding(.horizontal, 16)
     }

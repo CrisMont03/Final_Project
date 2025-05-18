@@ -11,7 +11,7 @@ struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var isLoading: Bool = false // Nuevo: para manejar el estado de carga
+    @State private var isLoading: Bool = false
 
     private let colors = (
         red: Color(hex: "D40035"),
@@ -85,7 +85,6 @@ struct LoginView: View {
                             print("Attempting to sign in with email: \(email)")
                             authViewModel.signIn(email: email, password: password)
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            isLoading = false
                         }
                     }) {
                         Text(isLoading ? "Iniciando..." : "Iniciar Sesión")
@@ -115,16 +114,17 @@ struct LoginView: View {
                 }
                 .padding(.horizontal, 24)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
                 // Redirección basada en el estado de autenticación
                 .navigationDestination(isPresented: $authViewModel.userIsLoggedIn) {
                     if authViewModel.isDoctor {
-                        DoctorView() // Asegúrate de tener esta vista
+                        DoctorView()
                             .environmentObject(authViewModel)
                     } else if authViewModel.isPatientRegistrationComplete {
-                        InicioView() // Asegúrate de tener esta vista
+                        InicioView()
                             .environmentObject(authViewModel)
                     } else {
-                        RegisterMedicalHistoryView()
+                        RegisterMedicalHistoryView() // Corregido: Navegar a RegisterMedicalHistoryView
                             .environmentObject(authViewModel)
                     }
                 }
@@ -133,6 +133,7 @@ struct LoginView: View {
             .onAppear {
                 print("LoginView appeared, clearing errorMessage")
                 authViewModel.errorMessage = ""
+                isLoading = false // Resetear isLoading al aparecer
             }
         }
     }
@@ -145,7 +146,7 @@ struct LoginView_Previews: PreviewProvider {
     }
 }
 
-// Extensión para colores hexadecimales (ya incluida en el código original)
+// Extensión para colores hexadecimales
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)

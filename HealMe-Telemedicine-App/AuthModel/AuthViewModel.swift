@@ -18,11 +18,11 @@ class AuthViewModel: ObservableObject {
     @Published var isPatientRegistrationComplete: Bool = false
     @Published var patientName: String = ""
     @Published var patientMedicalHistory: [String: Any] = [:]
+    @Published var isCheckingRegistration: Bool = false
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private let db = Firestore.firestore()
 
     init() {
-        // Inicializar Firebase explícitamente
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
             print("Firebase initialized in AuthViewModel")
@@ -30,11 +30,38 @@ class AuthViewModel: ObservableObject {
             print("Firebase already initialized")
         }
 
+        // Verificar usuario autenticado inmediatamente
+        if let user = Auth.auth().currentUser {
+            print("Initial check: User already authenticated, userId=\(user.uid), email=\(user.email ?? "none")")
+            self.isCheckingRegistration = true
+            let email = user.email ?? ""
+            self.isDoctor = email.hasSuffix("@healme.doc.co")
+            if self.isDoctor {
+                self.fetchDoctorData(email: email)
+                self.isPatientRegistrationComplete = true
+                self.patientName = ""
+                self.patientMedicalHistory = [:]
+                self.userIsLoggedIn = true
+                self.isCheckingRegistration = false
+            } else {
+                self.doctorData = nil
+                self.checkPatientRegistration(userId: user.uid) {
+                    self.fetchPatientData(userId: user.uid)
+                    self.userIsLoggedIn = true
+                    self.isCheckingRegistration = false
+                }
+            }
+        } else {
+            print("Initial check: No user authenticated")
+            self.isCheckingRegistration = false
+        }
+
+        // Configurar observador para cambios de estado
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self = self else { return }
             print("Auth state changed: user=\(user?.uid ?? "none"), email=\(user?.email ?? "none")")
-            self.userIsLoggedIn = user != nil
-            if let user = user {
+            if let user = user, !self.userIsLoggedIn {
+                self.isCheckingRegistration = true
                 let email = user.email ?? ""
                 self.isDoctor = email.hasSuffix("@healme.doc.co")
                 print("User is doctor: \(self.isDoctor)")
@@ -43,19 +70,26 @@ class AuthViewModel: ObservableObject {
                     self.isPatientRegistrationComplete = true
                     self.patientName = ""
                     self.patientMedicalHistory = [:]
+                    self.userIsLoggedIn = true
+                    self.isCheckingRegistration = false
                 } else {
                     self.doctorData = nil
-                    self.checkPatientRegistration(userId: user.uid)
-                    self.fetchPatientData(userId: user.uid)
+                    self.checkPatientRegistration(userId: user.uid) {
+                        self.fetchPatientData(userId: user.uid)
+                        self.userIsLoggedIn = true
+                        self.isCheckingRegistration = false
+                    }
                 }
-            } else {
+            } else if user == nil {
                 print("No user logged in, resetting state")
+                self.userIsLoggedIn = false
                 self.isDoctor = false
                 self.doctorData = nil
                 self.isPatientRegistrationComplete = false
                 self.patientName = ""
                 self.patientMedicalHistory = [:]
                 self.errorMessage = ""
+                self.isCheckingRegistration = false
             }
         }
     }
@@ -181,14 +215,18 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    private func checkPatientRegistration(userId: String) {
+    private func checkPatientRegistration(userId: String, completion: @escaping () -> Void) {
         print("Checking patient registration for userId: \(userId)")
         db.collection("patients").document(userId).getDocument { [weak self] snapshot, error in
-            guard let self = self else { return }
+            guard let self = self else {
+                completion()
+                return
+            }
             if let error = error {
                 print("Error checking patient registration: \(error.localizedDescription)")
                 self.isPatientRegistrationComplete = false
                 self.errorMessage = "Error al verificar registro del paciente"
+                completion()
                 return
             }
             if let data = snapshot?.data(), data["age"] != nil {
@@ -198,6 +236,7 @@ class AuthViewModel: ObservableObject {
                 print("Patient registration incomplete")
                 self.isPatientRegistrationComplete = false
             }
+            completion()
         }
     }
 
