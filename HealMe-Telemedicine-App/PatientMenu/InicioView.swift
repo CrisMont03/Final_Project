@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import SwiftUICharts
 import FirebaseAuth
 
 struct MedicalData: Identifiable {

@@ -21,6 +21,9 @@ class AuthViewModel: ObservableObject {
     @Published var isCheckingRegistration: Bool = false
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private let db = Firestore.firestore()
+    var currentUserId: String? {
+        Auth.auth().currentUser?.uid
+    }
 
     init() {
         if FirebaseApp.app() == nil {
@@ -30,7 +33,6 @@ class AuthViewModel: ObservableObject {
             print("Firebase already initialized")
         }
 
-        // Verificar usuario autenticado inmediatamente
         if let user = Auth.auth().currentUser {
             print("Initial check: User already authenticated, userId=\(user.uid), email=\(user.email ?? "none")")
             self.isCheckingRegistration = true
@@ -56,7 +58,6 @@ class AuthViewModel: ObservableObject {
             self.isCheckingRegistration = false
         }
 
-        // Configurar observador para cambios de estado
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self = self else { return }
             print("Auth state changed: user=\(user?.uid ?? "none"), email=\(user?.email ?? "none")")
@@ -163,7 +164,8 @@ class AuthViewModel: ObservableObject {
                 "email": email,
                 "name": name,
                 "createdAt": Timestamp(),
-                "isDoctor": false
+                "isDoctor": false,
+                "appointments": [] // Inicializar appointments
             ]
             print("Saving patient data to Firestore: \(patientData)")
             self.db.collection("patients").document(user.uid).setData(patientData) { error in
@@ -210,6 +212,7 @@ class AuthViewModel: ObservableObject {
             print("Medical history updated: \(medicalHistory)")
             self.patientMedicalHistory = medicalHistory
             self.isPatientRegistrationComplete = true
+            UserDefaults.standard.set(true, forKey: "isPatientRegistrationComplete_\(userId)")
             self.errorMessage = ""
             completion(true)
         }
@@ -217,6 +220,12 @@ class AuthViewModel: ObservableObject {
 
     private func checkPatientRegistration(userId: String, completion: @escaping () -> Void) {
         print("Checking patient registration for userId: \(userId)")
+        if UserDefaults.standard.bool(forKey: "isPatientRegistrationComplete_\(userId)") {
+            print("Patient registration complete (cached)")
+            self.isPatientRegistrationComplete = true
+            completion()
+            return
+        }
         db.collection("patients").document(userId).getDocument { [weak self] snapshot, error in
             guard let self = self else {
                 completion()
@@ -232,6 +241,7 @@ class AuthViewModel: ObservableObject {
             if let data = snapshot?.data(), data["age"] != nil {
                 print("Patient registration complete: \(data)")
                 self.isPatientRegistrationComplete = true
+                UserDefaults.standard.set(true, forKey: "isPatientRegistrationComplete_\(userId)")
             } else {
                 print("Patient registration incomplete")
                 self.isPatientRegistrationComplete = false
@@ -282,5 +292,191 @@ class AuthViewModel: ObservableObject {
                 print("Doctor data fetched: \(String(describing: self.doctorData))")
                 self.errorMessage = ""
             }
+    }
+
+    func findAvailableDoctor(specialty: String, date: String, hour: String, completion: @escaping (String?, String?) -> Void) {
+        print("Finding available doctor for specialty: \(specialty), date: \(date), hour: \(hour)")
+        db.collection("doctors")
+            .whereField("specialty", isEqualTo: specialty)
+            .getDocuments { (snapshot: QuerySnapshot?, error: Error?) in
+                if let error = error {
+                    print("Error fetching doctors: \(error.localizedDescription)")
+                    completion(nil, nil)
+                    return
+                }
+                guard let documents = snapshot?.documents, !documents.isEmpty else {
+                    print("No doctors found for specialty: \(specialty)")
+                    completion(nil, nil)
+                    return
+                }
+
+                for document in documents {
+                    let doctorId = document.documentID
+                    let doctorData = document.data()
+                    let doctorName = doctorData["name"] as? String ?? "Desconocido"
+                    let appointments = doctorData["appointments"] as? [[String: Any]] ?? []
+
+                    let isAvailable = appointments.allSatisfy { appointment in
+                        let apptDate = appointment["date"] as? String ?? ""
+                        let apptHour = appointment["hour"] as? String ?? ""
+                        return !(apptDate == date && apptHour == hour)
+                    }
+
+                    if isAvailable {
+                        print("Doctor available: \(doctorName) (ID: \(doctorId))")
+                        completion(doctorId, doctorName)
+                        return
+                    }
+                }
+                print("No available doctors found")
+                completion(nil, nil)
+            }
+    }
+
+    func createAppointment(appointment: Appointment, completion: @escaping (Bool) -> Void) {
+        guard let userId = currentUserId else {
+            print("No user ID available")
+            errorMessage = "No se pudo obtener el ID del usuario"
+            completion(false)
+            return
+        }
+
+        guard !patientName.isEmpty else {
+            print("Patient name is empty")
+            errorMessage = "El nombre del paciente no está disponible"
+            completion(false)
+            return
+        }
+
+        let patientAppointment: [String: Any] = [
+            "doctorId": appointment.doctorId,
+            "doctorName": appointment.doctorName,
+            "specialty": appointment.specialty,
+            "date": appointment.date,
+            "hour": appointment.hour
+        ]
+
+        let doctorAppointment: [String: Any] = [
+            "date": appointment.date,
+            "hour": appointment.hour,
+            "patientName": patientName
+        ]
+
+        print("Starting createAppointment for userId: \(userId), doctorId: \(appointment.doctorId), patientName: \(patientName)")
+
+        // Verificar documento del paciente
+        db.collection("patients").document(userId).getDocument { snapshot, error in
+            print("Checking patient document for userId: \(userId)")
+            if let error = error {
+                print("Error checking patient document: \(error.localizedDescription)")
+                self.errorMessage = "Error al verificar datos del paciente: \(error.localizedDescription)"
+                completion(false)
+                return
+            }
+
+            guard snapshot?.exists == true else {
+                print("Patient document does not exist for userId: \(userId)")
+                self.errorMessage = "El documento del paciente no existe"
+                completion(false)
+                return
+            }
+
+            print("Patient document exists, checking doctor document")
+
+            // Verificar documento del doctor
+            self.db.collection("doctors").document(appointment.doctorId).getDocument { snapshot, error in
+                print("Checking doctor document for doctorId: \(appointment.doctorId)")
+                if let error = error {
+                    print("Error checking doctor document: \(error.localizedDescription)")
+                    self.errorMessage = "Error al verificar datos del doctor: \(error.localizedDescription)"
+                    completion(false)
+                    return
+                }
+
+                guard snapshot?.exists == true else {
+                    print("Doctor document does not exist for doctorId: \(appointment.doctorId)")
+                    self.errorMessage = "El documento del doctor no existe"
+                    completion(false)
+                    return
+                }
+
+                // Inicializar appointments en el doctor si no existe
+                let doctorData = snapshot?.data()
+                if doctorData?["appointments"] == nil {
+                    print("Initializing appointments array for doctorId: \(appointment.doctorId)")
+                    self.db.collection("doctors").document(appointment.doctorId).setData([
+                        "appointments": []
+                    ], merge: true) { error in
+                        if let error = error {
+                            print("Error initializing doctor appointments array: \(error.localizedDescription)")
+                            self.errorMessage = "Error al inicializar datos de citas del doctor: \(error.localizedDescription)"
+                            completion(false)
+                            return
+                        }
+                        print("Doctor appointments array initialized successfully")
+                        self.updateAppointments(userId: userId, patientAppointment: patientAppointment, doctorId: appointment.doctorId, doctorAppointment: doctorAppointment, completion: completion)
+                    }
+                } else {
+                    print("Doctor appointments array exists, proceeding to update")
+                    self.updateAppointments(userId: userId, patientAppointment: patientAppointment, doctorId: appointment.doctorId, doctorAppointment: doctorAppointment, completion: completion)
+                }
+            }
+        }
+    }
+
+    private func updateAppointments(userId: String, patientAppointment: [String: Any], doctorId: String, doctorAppointment: [String: Any], completion: @escaping (Bool) -> Void) {
+        print("Updating patient appointments for userId: \(userId)")
+        db.collection("patients").document(userId).updateData([
+            "appointments": FieldValue.arrayUnion([patientAppointment])
+        ]) { error in
+            if let error = error {
+                print("Error saving patient appointment: \(error.localizedDescription)")
+                self.errorMessage = "Error al guardar la cita del paciente: \(error.localizedDescription)"
+                completion(false)
+                return
+            }
+
+            print("Patient appointment saved, updating doctor appointments for doctorId: \(doctorId)")
+            self.db.collection("doctors").document(doctorId).updateData([
+                "appointments": FieldValue.arrayUnion([doctorAppointment])
+            ]) { error in
+                if let error = error {
+                    print("Error saving doctor appointment: \(error.localizedDescription)")
+                    self.errorMessage = "Error al guardar la cita del doctor: \(error.localizedDescription)"
+                    completion(false)
+                    return
+                }
+                print("Appointment created successfully")
+                self.errorMessage = ""
+                completion(true)
+            }
+        }
+    }
+
+    func fetchPatientAppointments(userId: String, completion: @escaping ([Appointment]) -> Void) {
+        print("Fetching appointments for userId: \(userId)")
+        db.collection("patients").document(userId).getDocument { (snapshot: DocumentSnapshot?, error: Error?) in
+            if let error = error {
+                print("Error fetching appointments: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let data = snapshot?.data(),
+                  let appointmentsData = data["appointments"] as? [[String: Any]] else {
+                print("No appointments found for userId: \(userId)")
+                completion([])
+                return
+            }
+            
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: appointmentsData)
+                let appointments = try JSONDecoder().decode([Appointment].self, from: jsonData)
+                completion(appointments)
+            } catch {
+                print("Error decoding appointments: \(error.localizedDescription)")
+                completion([])
+            }
+        }
     }
 }
