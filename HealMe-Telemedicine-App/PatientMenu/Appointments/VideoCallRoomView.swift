@@ -1,10 +1,12 @@
 import SwiftUI
 import AgoraRtcKit
+import AVFoundation
 
 struct VideoCallRoomView: View {
     let appointment: Appointment
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) var dismiss
+    @State private var isDoctorConnected = false
     
     private let colors = (
         red: Color(hex: "D40035"),
@@ -26,7 +28,8 @@ struct VideoCallRoomView: View {
                 
                 AgoraVideoCallView(
                     appointment: appointment,
-                    authViewModel: authViewModel
+                    authViewModel: authViewModel,
+                    isDoctorConnected: $isDoctorConnected
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -50,10 +53,26 @@ struct VideoCallRoomView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
+            
+            if !isDoctorConnected {
+                ZStack {
+                    Color.black
+                        .ignoresSafeArea()
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: colors.blue))
+                            .scaleEffect(1.5)
+                        Text("Esperando al Dr. \(appointment.doctorName)")
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                }
+            }
         }
         .navigationBarHidden(true)
         .onAppear {
             print("VideoCallRoomView appeared for appointment: \(appointment)")
+            print("Channel name for this call: healme_\(appointment.id.uuidString)")
         }
     }
 }
@@ -61,14 +80,16 @@ struct VideoCallRoomView: View {
 struct AgoraVideoCallView: UIViewControllerRepresentable {
     let appointment: Appointment
     let authViewModel: AuthViewModel
+    @Binding var isDoctorConnected: Bool
     
     func makeUIViewController(context: Context) -> AgoraVideoCallViewController {
         let channelName = "healme_\(appointment.id.uuidString)"
         let viewController = AgoraVideoCallViewController(
-            appId: "3617dfcb05d34ca8b60f3a22be314fcd", // Reemplaza con tu App ID
-            token: nil, // Reemplaza con el nuevo token o nil si App Certificate está desactivado
+            appId: "3617dfcb05d34ca8b60f3a22be314fcd",
+            token: nil,
             channelName: channelName,
-            userId: authViewModel.currentUserId ?? "patient_\(UUID().uuidString)"
+            userId: authViewModel.currentUserId ?? "patient_\(UUID().uuidString)",
+            isDoctorConnected: $isDoctorConnected
         )
         viewController.coordinator = context.coordinator
         return viewController
@@ -98,17 +119,20 @@ class AgoraVideoCallCoordinator: NSObject, AgoraRtcEngineDelegate {
             print("ViewController is nil, cannot setup remote video")
             return
         }
+        viewController.remoteVideoView.subviews.forEach { $0.removeFromSuperview() }
         let videoCanvas = AgoraRtcVideoCanvas()
         videoCanvas.uid = uid
         videoCanvas.renderMode = .hidden
         videoCanvas.view = viewController.remoteVideoView
         engine.setupRemoteVideo(videoCanvas)
+        parent.isDoctorConnected = true
         print("Remote video setup for uid: \(uid)")
     }
     
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOfflineOfUid uid: UInt, reason: AgoraUserOfflineReason) {
         print("Remote user \(uid) left with reason: \(reason.rawValue)")
         viewController?.remoteVideoView.subviews.forEach { $0.removeFromSuperview() }
+        parent.isDoctorConnected = false
     }
     
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurError errorCode: AgoraErrorCode) {
@@ -131,12 +155,14 @@ class AgoraVideoCallViewController: UIViewController {
     private let userId: String
     weak var coordinator: AgoraVideoCallCoordinator?
     private var isConnected = false
+    @Binding private var isDoctorConnected: Bool
     
     private let colors = (
         red: UIColor(hex: "D40035"),
         green: UIColor(hex: "28A745"),
         blue: UIColor(hex: "007AFE"),
-        background: UIColor(hex: "F5F6F9")
+        background: UIColor(hex: "F5F6F9"),
+        gray: UIColor(hex: "808080")
     )
     
     private lazy var muteMicButton: UIButton = {
@@ -162,12 +188,13 @@ class AgoraVideoCallViewController: UIViewController {
     private var isMicMuted = false
     private var isCameraMuted = false
     
-    init(appId: String, token: String?, channelName: String, userId: String) {
+    init(appId: String, token: String?, channelName: String, userId: String, isDoctorConnected: Binding<Bool>) {
         self.appId = appId
         self.token = token
         self.channelName = channelName
         self.userId = userId
-        AgoraRtcEngineKit.destroy() // Limpiar estado previo del SDK
+        self._isDoctorConnected = isDoctorConnected
+        AgoraRtcEngineKit.destroy()
         self.agoraKit = AgoraRtcEngineKit.sharedEngine(withAppId: appId, delegate: nil)
         super.init(nibName: nil, bundle: nil)
         print("Initializing AgoraVideoCallViewController with appId: \(appId.prefix(6))..., channel: \(channelName), userId: \(userId), token: \(token?.prefix(10) ?? "nil")")
@@ -179,6 +206,7 @@ class AgoraVideoCallViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        checkPermissions()
         setupUI()
         coordinator?.viewController = self
         agoraKit.delegate = coordinator
@@ -196,10 +224,36 @@ class AgoraVideoCallViewController: UIViewController {
         }
     }
     
+    private func checkPermissions() {
+        let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        let micStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+        
+        if cameraStatus != .authorized {
+            print("Camera permission not granted: \(cameraStatus.rawValue)")
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if !granted {
+                        print("Camera permission denied by user")
+                    }
+                }
+            }
+        }
+        
+        if micStatus != .authorized {
+            print("Microphone permission not granted: \(micStatus.rawValue)")
+            AVCaptureDevice.requestAccess(for: .audio) { granted in
+                DispatchQueue.main.async {
+                    if !granted {
+                        print("Microphone permission denied by user")
+                    }
+                }
+            }
+        }
+    }
+    
     private func setupUI() {
         view.backgroundColor = colors.background
         
-        // Configurar vistas de video
         remoteVideoView.backgroundColor = .black
         localVideoView.backgroundColor = .black
         
@@ -214,25 +268,21 @@ class AgoraVideoCallViewController: UIViewController {
         view.addSubview(muteCameraButton)
         
         NSLayoutConstraint.activate([
-            // Vista remota (fondo)
             remoteVideoView.topAnchor.constraint(equalTo: view.topAnchor),
             remoteVideoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             remoteVideoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             remoteVideoView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            // Vista local (esquina superior derecha)
             localVideoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             localVideoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             localVideoView.widthAnchor.constraint(equalToConstant: 120),
             localVideoView.heightAnchor.constraint(equalToConstant: 160),
             
-            // Botón de micrófono
             muteMicButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             muteMicButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             muteMicButton.widthAnchor.constraint(equalToConstant: 48),
             muteMicButton.heightAnchor.constraint(equalToConstant: 48),
             
-            // Botón de cámara
             muteCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             muteCameraButton.leadingAnchor.constraint(equalTo: muteMicButton.trailingAnchor, constant: 16),
             muteCameraButton.widthAnchor.constraint(equalToConstant: 48),
@@ -241,7 +291,11 @@ class AgoraVideoCallViewController: UIViewController {
     }
     
     private func initializeAgoraEngine() {
+        agoraKit.setChannelProfile(.communication)
+        agoraKit.setAudioProfile(.default)
         agoraKit.enableVideo()
+        agoraKit.enableAudio()
+        agoraKit.setEnableSpeakerphone(true)
         agoraKit.setVideoEncoderConfiguration(
             AgoraVideoEncoderConfiguration(
                 size: CGSize(width: 640, height: 360),
@@ -251,7 +305,7 @@ class AgoraVideoCallViewController: UIViewController {
                 mirrorMode: .auto
             )
         )
-        print("Agora engine initialized")
+        print("Agora engine initialized with video, audio, communication profile, and speakerphone")
     }
     
     private func setupLocalVideo() {
@@ -273,7 +327,11 @@ class AgoraVideoCallViewController: UIViewController {
             joinSuccess: { [weak self] (channel, uid, elapsed) in
                 print("Joined channel \(channel) with uid \(uid), elapsed: \(elapsed)ms")
                 self?.isConnected = true
-                self?.agoraKit.setEnableSpeakerphone(true)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self?.agoraKit.muteLocalAudioStream(false)
+                    self?.agoraKit.muteLocalVideoStream(false)
+                    print("Audio and video streams enabled after join")
+                }
             }
         )
         print("Join channel result: \(result), channel: \(channelName), userId: \(userId), token: \(token?.prefix(10) ?? "nil")")
@@ -288,25 +346,60 @@ class AgoraVideoCallViewController: UIViewController {
         isConnected = false
     }
     
-    // MARK: - Button Actions
     @objc private func toggleMic() {
+        guard isConnected else {
+            print("Cannot toggle mic, not connected to channel")
+            return
+        }
         isMicMuted.toggle()
-        agoraKit.muteLocalAudioStream(isMicMuted)
+        let muteResult = agoraKit.muteLocalAudioStream(isMicMuted)
+        let enableResult = agoraKit.enableLocalAudio(!isMicMuted)
+        if isMicMuted {
+            agoraKit.adjustRecordingSignalVolume(0)
+        } else {
+            agoraKit.adjustRecordingSignalVolume(100)
+        }
         muteMicButton.setImage(
             UIImage(systemName: isMicMuted ? "mic.slash.fill" : "mic.fill"),
             for: .normal
         )
-        print("Microphone \(isMicMuted ? "muted" : "unmuted")")
+        muteMicButton.backgroundColor = isMicMuted ? colors.gray : colors.blue
+        print("Microphone \(isMicMuted ? "muted" : "unmuted"), muteLocalAudioStream: \(isMicMuted), muteResult: \(muteResult), enableLocalAudio: \(!isMicMuted), enableResult: \(enableResult), volume: \(isMicMuted ? 0 : 100)")
     }
     
     @objc private func toggleCamera() {
+        guard isConnected else {
+            print("Cannot toggle camera, not connected to channel")
+            return
+        }
         isCameraMuted.toggle()
-        agoraKit.muteLocalVideoStream(isCameraMuted)
+        let muteResult = agoraKit.muteLocalVideoStream(isCameraMuted)
+        let enableResult = agoraKit.enableLocalVideo(!isCameraMuted)
+        if isCameraMuted {
+            agoraKit.stopPreview()
+            let videoCanvas = AgoraRtcVideoCanvas()
+            videoCanvas.uid = 0
+            videoCanvas.view = nil
+            agoraKit.setupLocalVideo(videoCanvas)
+            print("Camera muted, preview stopped")
+        } else {
+            agoraKit.enableVideo()
+            let videoCanvas = AgoraRtcVideoCanvas()
+            videoCanvas.uid = 0
+            videoCanvas.renderMode = .hidden
+            videoCanvas.view = localVideoView
+            DispatchQueue.main.async {
+                self.agoraKit.setupLocalVideo(videoCanvas)
+                let previewResult = self.agoraKit.startPreview()
+                print("Camera unmuted, preview started, previewResult: \(previewResult), subviews: \(self.localVideoView.subviews.count)")
+            }
+        }
         muteCameraButton.setImage(
             UIImage(systemName: isCameraMuted ? "video.slash.fill" : "video.fill"),
             for: .normal
         )
-        print("Camera \(isCameraMuted ? "muted" : "unmuted")")
+        muteCameraButton.backgroundColor = isCameraMuted ? colors.gray : colors.blue
+        print("Camera \(isCameraMuted ? "muted" : "unmuted"), muteLocalVideoStream: \(isCameraMuted), muteResult: \(muteResult), enableLocalVideo: \(!isCameraMuted), enableResult: \(enableResult)")
     }
 }
 
@@ -323,7 +416,6 @@ struct VideoCallRoomView_Previews: PreviewProvider {
     }
 }
 
-// Extensión para UIColor con hex
 extension UIColor {
     convenience init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -331,7 +423,7 @@ extension UIColor {
         Scanner(string: hex).scanHexInt64(&int)
         let a, r, g, b: UInt64
         switch hex.count {
-        case 6: // RGB (24-bit)
+        case 6:
             (a, r, g, b) = (255, (int >> 16) & 0xFF, (int >> 8) & 0xFF, int & 0xFF)
         default:
             (a, r, g, b) = (255, 0, 0, 0)
