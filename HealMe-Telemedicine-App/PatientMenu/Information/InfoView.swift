@@ -7,7 +7,7 @@ struct InfoView: View {
     @State private var ageString: String = ""
     @State private var heightString: String = ""
     @State private var weightString: String = ""
-    @State private var originalMedicalHistory: MedicalHistory = MedicalHistory() // Para comparar cambios
+    @State private var originalMedicalHistory: MedicalHistory = MedicalHistory()
     @State private var isEditing = false
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -27,92 +27,19 @@ struct InfoView: View {
                 .ignoresSafeArea()
             
             if isLoading {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: colors.blue))
-                        .scaleEffect(1.5)
-                    Text("Cargando historial médico...")
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(.black)
-                }
+                LoadingView(colors: colors)
             } else if let errorMessage = errorMessage {
-                VStack(spacing: 16) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(colors.red)
-                        .font(.system(size: 40))
-                    Text(errorMessage)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.center)
-                    Button(action: fetchMedicalHistory) {
-                        Text("Reintentar")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(colors.blue)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                }
-                .padding()
+                ErrorView(errorMessage: errorMessage, colors: colors, retryAction: fetchMedicalHistory)
             } else {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        Text("Historial Médico")
-                            .font(.system(size: 24, weight: .medium, design: .rounded))
-                            .foregroundColor(.black)
-                            .padding(.top, 16)
-                        
-                        Group {
-                            HistoryField(label: "Edad", value: $ageString, isEditing: isEditing, type: .number)
-                            HistoryField(label: "Alergias", value: $medicalHistory.allergies, isEditing: isEditing, type: .text)
-                            HistoryField(label: "Tipo de sangre", value: $medicalHistory.bloodType, isEditing: isEditing, type: .text)
-                            HistoryField(label: "Dieta", value: $medicalHistory.diet, isEditing: isEditing, type: .text)
-                            HistoryField(label: "Ejercicio", value: $medicalHistory.exercise, isEditing: isEditing, type: .text)
-                            HistoryField(label: "Género", value: $medicalHistory.gender, isEditing: isEditing, type: .text)
-                            HistoryField(label: "Altura (cm)", value: $heightString, isEditing: isEditing, type: .decimal)
-                            HistoryField(label: "Peso (kg)", value: $weightString, isEditing: isEditing, type: .decimal)
-                        }
-                        .padding(.horizontal, 16)
-                        
-                        if isEditing {
-                            HStack(spacing: 16) {
-                                Button(action: saveMedicalHistory) {
-                                    Text("Guardar")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(colors.green)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                }
-                                
-                                Button(action: { isEditing = false }) {
-                                    Text("Cancelar")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(colors.gray)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 16)
-                        } else {
-                            Button(action: { isEditing = true }) {
-                                Text("Editar historial")
-                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(colors.red)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 16)
-                        }
-                    }
-                }
+                ContentView(
+                    medicalHistory: $medicalHistory,
+                    ageString: $ageString,
+                    heightString: $heightString,
+                    weightString: $weightString,
+                    isEditing: $isEditing,
+                    colors: colors,
+                    saveAction: saveMedicalHistory
+                )
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -120,6 +47,210 @@ struct InfoView: View {
             fetchMedicalHistory()
         }
     }
+    
+    // MARK: - Subviews
+    
+    private struct LoadingView: View {
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
+        
+        var body: some View {
+            VStack(spacing: 16) {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: colors.blue))
+                    .scaleEffect(1.5)
+                Text("Cargando historial médico...")
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .foregroundColor(.black)
+            }
+        }
+    }
+    
+    private struct ErrorView: View {
+        let errorMessage: String
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
+        let retryAction: () -> Void
+        
+        var body: some View {
+            VStack(spacing: 16) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(colors.red)
+                    .font(.system(size: 40))
+                Text(errorMessage)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                Button(action: retryAction) {
+                    Text("Reintentar")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(colors.blue)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+            }
+            .padding()
+        }
+    }
+    
+    private struct ContentView: View {
+        @Binding var medicalHistory: MedicalHistory
+        @Binding var ageString: String
+        @Binding var heightString: String
+        @Binding var weightString: String
+        @Binding var isEditing: Bool
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
+        let saveAction: () -> Void
+        
+        var body: some View {
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        VStack(spacing: 0) {
+                            Text("Historial Médico")
+                                .font(.system(size: 28, weight: .medium, design: .rounded))
+                                .foregroundColor(.black)
+                            Text("Actualiza tu historial:")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.top, 35)
+                        .padding(.bottom, 25)
+                        
+                        MedicalHistoryTable(
+                            medicalHistory: $medicalHistory,
+                            ageString: $ageString,
+                            heightString: $heightString,
+                            weightString: $weightString,
+                            isEditing: isEditing,
+                            colors: colors
+                        )
+                    }
+                }
+                
+                // Conditional button display at the bottom
+                if isEditing {
+                    EditingButtons(
+                        saveAction: saveAction,
+                        cancelAction: { isEditing = false },
+                        colors: colors
+                    )
+                } else {
+                    EditButton(isEditing: $isEditing, colors: colors)
+                }
+            }
+        }
+    }
+    
+    private struct MedicalHistoryTable: View {
+        @Binding var medicalHistory: MedicalHistory
+        @Binding var ageString: String
+        @Binding var heightString: String
+        @Binding var weightString: String
+        let isEditing: Bool
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
+        
+        var body: some View {
+            VStack(spacing: 0) {
+                HStack {
+                    Text("Concepto")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(colors.blue)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Valor")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, 14)
+                .padding(.horizontal, 16)
+                .background(Color.white)
+                
+                Divider()
+                    .background(colors.gray.opacity(0.3))
+                
+                HistoryField(label: "Edad", value: $ageString, isEditing: isEditing, type: .number)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Alergias", value: $medicalHistory.allergies, isEditing: isEditing, type: .text)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Tipo de sangre", value: $medicalHistory.bloodType, isEditing: isEditing, type: .text)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Dieta", value: $medicalHistory.diet, isEditing: isEditing, type: .text)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Ejercicio", value: $medicalHistory.exercise, isEditing: isEditing, type: .text)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Género", value: $medicalHistory.gender, isEditing: isEditing, type: .text)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Altura (cm)", value: $heightString, isEditing: isEditing, type: .decimal)
+                Divider().background(colors.gray.opacity(0.3))
+                HistoryField(label: "Peso (kg)", value: $weightString, isEditing: isEditing, type: .decimal)
+            }
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(colors.gray.opacity(0.3), lineWidth: 1)
+            )
+            .padding(.horizontal, 16)
+            .padding(.bottom, 17)
+        }
+    }
+    
+    private struct EditingButtons: View {
+        let saveAction: () -> Void
+        let cancelAction: () -> Void
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
+        
+        var body: some View {
+            HStack(spacing: 16) {
+                Button(action: saveAction) {
+                    Text("Guardar")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(colors.green)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                
+                Button(action: cancelAction) {
+                    Text("Cancelar")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(colors.gray)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
+        }
+    }
+    
+    private struct EditButton: View {
+        @Binding var isEditing: Bool
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
+        
+        var body: some View {
+            Button(action: { isEditing = true }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Editar historial")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(colors.green)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
+        }
+    }
+    
+    // MARK: - Methods
     
     private func fetchMedicalHistory() {
         guard let userId = authViewModel.currentUserId else {
@@ -159,7 +290,7 @@ struct InfoView: View {
                 )
                 originalMedicalHistory = medicalHistory
                 ageString = medicalHistory.age == 0 ? "" : String(medicalHistory.age)
-                heightString = medicalHistory.height == 0.0 ? "" : String(format: "%.0f", medicalHistory.height * 100) // Metros a cm
+                heightString = medicalHistory.height == 0.0 ? "" : String(format: "%.0f", medicalHistory.height)
                 weightString = medicalHistory.weight == 0.0 ? "" : String(format: "%.1f", medicalHistory.weight)
                 print("Medical history loaded: \(medicalHistory), ageString: \(ageString), heightString: \(heightString), weightString: \(weightString)")
             }
@@ -173,11 +304,9 @@ struct InfoView: View {
             return
         }
         
-        // Crear diccionario para datos actualizados
         var data: [String: Any] = [:]
         var errors: [String] = []
         
-        // Validar edad si cambió
         if ageString != (originalMedicalHistory.age == 0 ? "" : String(originalMedicalHistory.age)) {
             guard let age = Int(ageString), age >= 0, age <= 120 else {
                 errors.append("La edad debe ser un número entre 0 y 120.")
@@ -190,20 +319,18 @@ struct InfoView: View {
             medicalHistory.age = originalMedicalHistory.age
         }
         
-        // Validar altura si cambió (en cm, convertir a m)
-        if heightString != (originalMedicalHistory.height == 0.0 ? "" : String(format: "%.0f", originalMedicalHistory.height * 100)) {
+        if heightString != (originalMedicalHistory.height == 0.0 ? "" : String(format: "%.0f", originalMedicalHistory.height)) {
             guard let heightCm = Double(heightString.replacingOccurrences(of: ",", with: ".")), heightCm >= 50, heightCm <= 250 else {
                 errors.append("La altura debe ser un número entre 50 y 250 cm.")
                 print("Invalid height input: \(heightString)")
                 return
             }
-            medicalHistory.height = heightCm / 100 // Convertir cm a m
+            medicalHistory.height = heightCm
             if medicalHistory.height != 0.0 { data["height"] = medicalHistory.height }
         } else {
             medicalHistory.height = originalMedicalHistory.height
         }
         
-        // Validar peso si cambió
         if weightString != (originalMedicalHistory.weight == 0.0 ? "" : String(format: "%.1f", originalMedicalHistory.weight)) {
             guard let weight = Double(weightString.replacingOccurrences(of: ",", with: ".")), weight >= 10, weight <= 300 else {
                 errors.append("El peso debe ser un número entre 10 y 300 kg.")
@@ -216,7 +343,6 @@ struct InfoView: View {
             medicalHistory.weight = originalMedicalHistory.weight
         }
         
-        // Añadir campos de texto si cambiaron
         if medicalHistory.allergies != originalMedicalHistory.allergies, !medicalHistory.allergies.isEmpty {
             data["allergies"] = medicalHistory.allergies
         }
@@ -233,14 +359,12 @@ struct InfoView: View {
             data["gender"] = medicalHistory.gender
         }
         
-        // Mostrar errores si los hay
         if !errors.isEmpty {
             errorMessage = errors.joined(separator: " ")
             isLoading = false
             return
         }
         
-        // Evitar actualizar si no hay datos válidos
         guard !data.isEmpty else {
             errorMessage = "No se proporcionaron datos válidos para actualizar."
             print("No valid data to update for userId: \(userId)")
@@ -257,7 +381,7 @@ struct InfoView: View {
                     errorMessage = "Error al guardar el historial: \(error.localizedDescription)"
                     print("Firestore update error: \(error)")
                 } else {
-                    originalMedicalHistory = medicalHistory // Actualizar valores originales
+                    originalMedicalHistory = medicalHistory
                     isEditing = false
                     print("Medical history updated successfully for userId: \(userId), updated fields: \(data)")
                 }
@@ -313,8 +437,8 @@ struct HistoryField: View {
         HStack {
             Text(label)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
-                .foregroundColor(.black)
-                .frame(width: 120, alignment: .leading)
+                .foregroundColor(.blue)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             if isEditing {
                 TextField("",
@@ -333,6 +457,7 @@ struct HistoryField: View {
                 )
                 .keyboardType(type == .number ? .numberPad : type == .decimal ? .decimalPad : .default)
                 .font(.system(size: 16, design: .rounded))
+                .foregroundColor(.black)
                 .padding(8)
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -344,11 +469,11 @@ struct HistoryField: View {
                 Text(value.isEmpty ? "No registrado" : value)
                     .font(.system(size: 16, design: .rounded))
                     .foregroundColor(value.isEmpty ? .gray : .black)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            
-            Spacer()
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
     }
 }
 

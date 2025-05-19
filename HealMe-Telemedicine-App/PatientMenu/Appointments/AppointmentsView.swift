@@ -47,11 +47,16 @@ struct AppointmentsView: View {
                     .ignoresSafeArea()
 
                 VStack {
-                    Text("Mis Citas")
-                        .font(.system(size: 28, weight: .medium, design: .rounded))
-                        .foregroundColor(.black)
-                        .padding(.top, 35)
-                        .padding(.bottom, 8)
+                    VStack(spacing: 0) {
+                        Text("Mis Citas")
+                            .font(.system(size: 28, weight: .medium, design: .rounded))
+                            .foregroundColor(.black)
+                        Text("Agenda tu cita médica:")
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.top, 35)
+                    .padding(.bottom, 12)
 
                     if !errorMessage.isEmpty {
                         Text(errorMessage)

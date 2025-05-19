@@ -103,14 +103,17 @@ struct InicioView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // Encabezado de bienvenida
-                Text("Bienvenido, \(authViewModel.patientName.isEmpty ? "Paciente" : authViewModel.patientName)")
-                    .font(.system(size: 28, weight: .medium, design: .rounded))
-                    .foregroundColor(.black)
-                
-                Text("Tu resumen médico")
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(.gray)
+                VStack(spacing: 0) {
+                    // Encabezado de bienvenida
+                    Text("¡Hola, \(authViewModel.patientName.isEmpty ? "Paciente!" : authViewModel.patientName)!")
+                        .font(.system(size: 28, weight: .medium, design: .rounded))
+                        .foregroundColor(.black)
+                    Text("Observa tu resumen médico de los últimos días:")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(.gray)
+                }
+                .padding(.top, 7)
+                .padding(.bottom, 15)
                 
                 // Tarjeta: Gráfico de barras (Resumen Vital)
                 if isDataLoaded && !barChartData.isEmpty {
