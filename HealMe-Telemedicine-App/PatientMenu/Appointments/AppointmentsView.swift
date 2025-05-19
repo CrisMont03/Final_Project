@@ -30,6 +30,7 @@ struct AppointmentsView: View {
     @State private var isShowingForm: Bool = false
     @State private var isShowingQRModal: Bool = false
     @State private var selectedAppointment: Appointment?
+    @State private var selectedVideoCallAppointment: Appointment?
     @State private var errorMessage: String = ""
 
     private let colors = (
@@ -69,7 +70,10 @@ struct AppointmentsView: View {
                         ScrollView {
                             VStack(spacing: 12) {
                                 ForEach(appointments) { appointment in
-                                    AppointmentCardView(appointment: appointment)
+                                    AppointmentCardView(appointment: appointment, onJoinVideoCall: {
+                                        selectedVideoCallAppointment = appointment
+                                        print("Joining video call for appointment: \(appointment)")
+                                    })
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -109,6 +113,15 @@ struct AppointmentsView: View {
                 })
                     .environmentObject(authViewModel)
             }
+            .navigationDestination(isPresented: Binding(
+                get: { selectedVideoCallAppointment != nil },
+                set: { if !$0 { selectedVideoCallAppointment = nil } }
+            )) {
+                if let appointment = selectedVideoCallAppointment {
+                    VideoCallRoomView(appointment: appointment)
+                        .environmentObject(authViewModel)
+                }
+            }
             .sheet(isPresented: $isShowingQRModal) {
                 QRScannerModalView(appointment: selectedAppointment) { appointment in
                     print("QRScannerModalView callback received appointment: \(String(describing: appointment))")
@@ -145,6 +158,7 @@ struct AppointmentsView: View {
 
     private struct AppointmentCardView: View {
         let appointment: Appointment
+        let onJoinVideoCall: () -> Void
         private let colors = (
             blue: Color(hex: "007AFE"),
             background: Color(hex: "F5F6F9")
@@ -168,11 +182,7 @@ struct AppointmentsView: View {
                         .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(.blue)
                 }
-                Button(action: {
-                    if let url = URL(string: "https://videocall.healme.com/\(appointment.doctorId)") {
-                        UIApplication.shared.open(url)
-                    }
-                }) {
+                Button(action: onJoinVideoCall) {
                     HStack(spacing: 8) {
                         Image(systemName: "video.fill")
                             .font(.system(size: 14, weight: .medium))

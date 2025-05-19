@@ -5,6 +5,13 @@
 //  Created by Cristian Montiel García on 16/05/25.
 //
 
+//
+//  AuthViewModel.swift
+//  HealMe-Telemedicine-App
+//
+//  Created by Cristian Montiel García on 16/05/25.
+//
+
 import FirebaseAuth
 import FirebaseFirestore
 import Foundation

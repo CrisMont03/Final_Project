@@ -8,6 +8,25 @@
 
 /* Begin PBXBuildFile section */
 		7A89B2262DD89B36006B0241 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 7A89B2252DD89B36006B0241 /* SwiftUICharts */; };
+		7ADF152A2DDB1E4A002ED00A /* AIAEC in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15292DDB1E4A002ED00A /* AIAEC */; };
+		7ADF152C2DDB1E4A002ED00A /* AIAECLL in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF152B2DDB1E4A002ED00A /* AIAECLL */; };
+		7ADF152E2DDB1E4A002ED00A /* AINS in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF152D2DDB1E4A002ED00A /* AINS */; };
+		7ADF15302DDB1E4A002ED00A /* AINSLL in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF152F2DDB1E4A002ED00A /* AINSLL */; };
+		7ADF15322DDB1E4A002ED00A /* AudioBeauty in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15312DDB1E4A002ED00A /* AudioBeauty */; };
+		7ADF15342DDB1E4A002ED00A /* ClearVision in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15332DDB1E4A002ED00A /* ClearVision */; };
+		7ADF15362DDB1E4A002ED00A /* ContentInspect in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15352DDB1E4A002ED00A /* ContentInspect */; };
+		7ADF15382DDB1E4A002ED00A /* FaceCapture in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15372DDB1E4A002ED00A /* FaceCapture */; };
+		7ADF153A2DDB1E4A002ED00A /* FaceDetection in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15392DDB1E4A002ED00A /* FaceDetection */; };
+		7ADF153C2DDB1E4A002ED00A /* LipSync in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF153B2DDB1E4A002ED00A /* LipSync */; };
+		7ADF153E2DDB1E4A002ED00A /* ReplayKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF153D2DDB1E4A002ED00A /* ReplayKit */; };
+		7ADF15402DDB1E4A002ED00A /* RtcBasic in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF153F2DDB1E4A002ED00A /* RtcBasic */; };
+		7ADF15422DDB1E4A002ED00A /* SpatialAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15412DDB1E4A002ED00A /* SpatialAudio */; };
+		7ADF15442DDB1E4A002ED00A /* VQA in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15432DDB1E4A002ED00A /* VQA */; };
+		7ADF15462DDB1E4A002ED00A /* VideoAv1CodecDec in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15452DDB1E4A002ED00A /* VideoAv1CodecDec */; };
+		7ADF15482DDB1E4A002ED00A /* VideoAv1CodecEnc in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15472DDB1E4A002ED00A /* VideoAv1CodecEnc */; };
+		7ADF154A2DDB1E4A002ED00A /* VideoCodecDec in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15492DDB1E4A002ED00A /* VideoCodecDec */; };
+		7ADF154C2DDB1E4A002ED00A /* VideoCodecEnc in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF154B2DDB1E4A002ED00A /* VideoCodecEnc */; };
+		7ADF154E2DDB1E4A002ED00A /* VirtualBackground in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF154D2DDB1E4A002ED00A /* VirtualBackground */; };
 		7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */; };
 		7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CE2DD80CCE00BED0F7 /* FirebaseCore */; };
 		7AE116D12DD80CCE00BED0F7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D02DD80CCE00BED0F7 /* FirebaseDatabase */; };
@@ -47,14 +66,33 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ADF153A2DDB1E4A002ED00A /* FaceDetection in Frameworks */,
 				7AE116D12DD80CCE00BED0F7 /* FirebaseDatabase in Frameworks */,
 				7AE116D32DD80CCE00BED0F7 /* FirebaseFirestore in Frameworks */,
+				7ADF15322DDB1E4A002ED00A /* AudioBeauty in Frameworks */,
 				7AE116D52DD80CCE00BED0F7 /* FirebaseFunctions in Frameworks */,
 				7AE116D72DD80CCE00BED0F7 /* FirebaseRemoteConfig in Frameworks */,
+				7ADF15422DDB1E4A002ED00A /* SpatialAudio in Frameworks */,
 				7AE116D92DD80CCE00BED0F7 /* FirebaseStorage in Frameworks */,
+				7ADF15302DDB1E4A002ED00A /* AINSLL in Frameworks */,
+				7ADF152E2DDB1E4A002ED00A /* AINS in Frameworks */,
 				7A89B2262DD89B36006B0241 /* SwiftUICharts in Frameworks */,
+				7ADF152C2DDB1E4A002ED00A /* AIAECLL in Frameworks */,
+				7ADF152A2DDB1E4A002ED00A /* AIAEC in Frameworks */,
+				7ADF15442DDB1E4A002ED00A /* VQA in Frameworks */,
+				7ADF154C2DDB1E4A002ED00A /* VideoCodecEnc in Frameworks */,
+				7ADF15462DDB1E4A002ED00A /* VideoAv1CodecDec in Frameworks */,
+				7ADF15362DDB1E4A002ED00A /* ContentInspect in Frameworks */,
 				7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */,
+				7ADF15342DDB1E4A002ED00A /* ClearVision in Frameworks */,
+				7ADF153E2DDB1E4A002ED00A /* ReplayKit in Frameworks */,
+				7ADF15482DDB1E4A002ED00A /* VideoAv1CodecEnc in Frameworks */,
+				7ADF153C2DDB1E4A002ED00A /* LipSync in Frameworks */,
+				7ADF154A2DDB1E4A002ED00A /* VideoCodecDec in Frameworks */,
+				7ADF15382DDB1E4A002ED00A /* FaceCapture in Frameworks */,
 				7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */,
+				7ADF15402DDB1E4A002ED00A /* RtcBasic in Frameworks */,
+				7ADF154E2DDB1E4A002ED00A /* VirtualBackground in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +143,25 @@
 				7AE116D62DD80CCE00BED0F7 /* FirebaseRemoteConfig */,
 				7AE116D82DD80CCE00BED0F7 /* FirebaseStorage */,
 				7A89B2252DD89B36006B0241 /* SwiftUICharts */,
+				7ADF15292DDB1E4A002ED00A /* AIAEC */,
+				7ADF152B2DDB1E4A002ED00A /* AIAECLL */,
+				7ADF152D2DDB1E4A002ED00A /* AINS */,
+				7ADF152F2DDB1E4A002ED00A /* AINSLL */,
+				7ADF15312DDB1E4A002ED00A /* AudioBeauty */,
+				7ADF15332DDB1E4A002ED00A /* ClearVision */,
+				7ADF15352DDB1E4A002ED00A /* ContentInspect */,
+				7ADF15372DDB1E4A002ED00A /* FaceCapture */,
+				7ADF15392DDB1E4A002ED00A /* FaceDetection */,
+				7ADF153B2DDB1E4A002ED00A /* LipSync */,
+				7ADF153D2DDB1E4A002ED00A /* ReplayKit */,
+				7ADF153F2DDB1E4A002ED00A /* RtcBasic */,
+				7ADF15412DDB1E4A002ED00A /* SpatialAudio */,
+				7ADF15432DDB1E4A002ED00A /* VQA */,
+				7ADF15452DDB1E4A002ED00A /* VideoAv1CodecDec */,
+				7ADF15472DDB1E4A002ED00A /* VideoAv1CodecEnc */,
+				7ADF15492DDB1E4A002ED00A /* VideoCodecDec */,
+				7ADF154B2DDB1E4A002ED00A /* VideoCodecEnc */,
+				7ADF154D2DDB1E4A002ED00A /* VirtualBackground */,
 			);
 			productName = "HealMe-Telemedicine-App";
 			productReference = 7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */;
@@ -137,6 +194,7 @@
 			packageReferences = (
 				7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				7A89B2242DD89B36006B0241 /* XCRemoteSwiftPackageReference "ChartView" */,
+				7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7AE116BA2DD8053E00BED0F7 /* Products */;
@@ -227,6 +285,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -378,8 +437,16 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AppPear/ChartView";
 			requirement = {
-				kind = upToNextMajorVersion;
+				kind = upToNextMinorVersion;
 				minimumVersion = 1.5.5;
+			};
+		};
+		7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AgoraIO/AgoraRtcEngine_iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
 			};
 		};
 		7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -397,6 +464,101 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A89B2242DD89B36006B0241 /* XCRemoteSwiftPackageReference "ChartView" */;
 			productName = SwiftUICharts;
+		};
+		7ADF15292DDB1E4A002ED00A /* AIAEC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = AIAEC;
+		};
+		7ADF152B2DDB1E4A002ED00A /* AIAECLL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = AIAECLL;
+		};
+		7ADF152D2DDB1E4A002ED00A /* AINS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = AINS;
+		};
+		7ADF152F2DDB1E4A002ED00A /* AINSLL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = AINSLL;
+		};
+		7ADF15312DDB1E4A002ED00A /* AudioBeauty */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = AudioBeauty;
+		};
+		7ADF15332DDB1E4A002ED00A /* ClearVision */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = ClearVision;
+		};
+		7ADF15352DDB1E4A002ED00A /* ContentInspect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = ContentInspect;
+		};
+		7ADF15372DDB1E4A002ED00A /* FaceCapture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = FaceCapture;
+		};
+		7ADF15392DDB1E4A002ED00A /* FaceDetection */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = FaceDetection;
+		};
+		7ADF153B2DDB1E4A002ED00A /* LipSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = LipSync;
+		};
+		7ADF153D2DDB1E4A002ED00A /* ReplayKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = ReplayKit;
+		};
+		7ADF153F2DDB1E4A002ED00A /* RtcBasic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = RtcBasic;
+		};
+		7ADF15412DDB1E4A002ED00A /* SpatialAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = SpatialAudio;
+		};
+		7ADF15432DDB1E4A002ED00A /* VQA */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = VQA;
+		};
+		7ADF15452DDB1E4A002ED00A /* VideoAv1CodecDec */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = VideoAv1CodecDec;
+		};
+		7ADF15472DDB1E4A002ED00A /* VideoAv1CodecEnc */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = VideoAv1CodecEnc;
+		};
+		7ADF15492DDB1E4A002ED00A /* VideoCodecDec */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = VideoCodecDec;
+		};
+		7ADF154B2DDB1E4A002ED00A /* VideoCodecEnc */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = VideoCodecEnc;
+		};
+		7ADF154D2DDB1E4A002ED00A /* VirtualBackground */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = VirtualBackground;
 		};
 		7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -154,6 +154,7 @@ struct AppointmentsFormView: View {
                 print("Doctor found: \(doctorName) (ID: \(doctorId))")
                 selectedDoctor = doctorName
                 let appointment = Appointment(
+                    
                     doctorId: doctorId,
                     doctorName: doctorName,
                     specialty: specialty,
