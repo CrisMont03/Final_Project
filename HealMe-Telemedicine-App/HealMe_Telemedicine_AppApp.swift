@@ -25,6 +25,7 @@ struct HealMe_Telemedicine_AppApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(AuthViewModel())
         }
     }
 }

@@ -8,24 +8,36 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var authViewModel = AuthViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
-        if authViewModel.userIsLoggedIn {
-            if authViewModel.isDoctor {
-                DoctorView()
-                    .environmentObject(authViewModel)
-            } else if authViewModel.isPatientRegistrationComplete {
+        NavigationStack {
+            ZStack {
+                Color(hex: "F5F6F9") // Fondo consistente con LoginView
+                    .ignoresSafeArea()
                 
-                PatientMenuView() // Cambiado de PatientView a PatientMenuView
-                    .environmentObject(authViewModel)
-            } else {
-                LoginView()
-                    .environmentObject(authViewModel)
+                if authViewModel.isCheckingRegistration {
+                    ProgressView("Cargando...")
+                        .progressViewStyle(.circular)
+                        .foregroundColor(.black)
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                } else if authViewModel.userIsLoggedIn {
+                    if authViewModel.isDoctor {
+                        DoctorView()
+                            .environmentObject(authViewModel)
+                    } else if authViewModel.isPatientRegistrationComplete {
+                        PatientMenuView() // Cambiado de InicioView a PatientMenuView
+                            .environmentObject(authViewModel)
+                    } else {
+                        RegisterMedicalHistoryView() // Corregido: Navegar a RegisterMedicalHistoryView
+                            .environmentObject(authViewModel)
+                    }
+                } else {
+                    LoginView()
+                        .environmentObject(authViewModel)
+                }
             }
-        } else {
-            LoginView()
-                .environmentObject(authViewModel)
+            .navigationBarHidden(true)
         }
     }
 }

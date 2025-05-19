@@ -9,11 +9,12 @@ import SwiftUI
 
 struct RegisterView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @Environment(\.dismiss) var dismiss // Añadido para regresar a la vista anterior
+    @Environment(\.dismiss) var dismiss
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var navigateToMedicalHistory: Bool = false
+    @State private var isLoading: Bool = false
 
     private let colors = (
         red: Color(hex: "D40035"),
@@ -31,41 +32,56 @@ struct RegisterView: View {
                 VStack(alignment: .center, spacing: 5) {
                     Text("Regístrate")
                         .font(.system(size: 32, weight: .semibold, design: .rounded))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                     Text("Crea tu cuenta como paciente:")
                         .font(.system(size: 16, weight: .light, design: .rounded))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                 }
 
-                TextField("Nombre completo", text: $name)
+                TextField(
+                    "",
+                    text: $name,
+                    prompt: Text("Nombre completo").foregroundColor(.black.opacity(0.5))
+                )
+                    .foregroundColor(.black)
                     .padding()
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
                     )
                     .textContentType(.name)
 
-                TextField("Correo", text: $email)
+                TextField(
+                    "",
+                    text: $email,
+                    prompt: Text("Correo").foregroundColor(.black.opacity(0.5))
+                )
+                    .foregroundColor(.black)
                     .padding()
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
                     )
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
                     .textContentType(.emailAddress)
 
-                SecureField("Contraseña", text: $password)
+                SecureField(
+                    "",
+                    text: $password,
+                    prompt: Text("Contraseña").foregroundColor(.black.opacity(0.5))
+                )
+                    .foregroundColor(.black)
                     .padding()
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
                     )
                     .textContentType(.password)
 
@@ -78,52 +94,67 @@ struct RegisterView: View {
                 }
 
                 Button(action: {
+                    guard !isLoading else { return }
                     if name.isEmpty || email.isEmpty || password.isEmpty {
                         authViewModel.errorMessage = "Por favor, completa todos los campos"
                     } else if email.hasSuffix("@healme.doc.co") {
                         authViewModel.errorMessage = "Este correo está reservado para médicos"
+                    } else if password.count < 6 {
+                        authViewModel.errorMessage = "La contraseña debe tener al menos 6 caracteres"
                     } else {
+                        isLoading = true
+                        print("Attempting to sign up with email: \(email), name: \(name)")
                         authViewModel.signUpPatient(email: email, password: password, name: name) { success in
+                            isLoading = false
                             if success {
+                                print("Sign-up successful, navigating to RegisterMedicalHistoryView")
                                 navigateToMedicalHistory = true
+                            } else {
+                                print("Sign-up failed, error: \(authViewModel.errorMessage)")
+                                if authViewModel.errorMessage.isEmpty {
+                                    authViewModel.errorMessage = "Error al registrarse, intenta de nuevo"
+                                }
                             }
                         }
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
                 }) {
-                    Text("Registrarse")
+                    Text(isLoading ? "Registrando..." : "Registrarse")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(colors.green)
+                        .background(isLoading ? colors.green.opacity(0.5) : colors.green)
                         .foregroundColor(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .disabled(isLoading)
 
-                // Nuevo enlace para regresar a LoginView
                 HStack(spacing: 0) {
                     Text("¿Ya tienes una cuenta? ")
                         .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                     
                     Text("Inicia sesión")
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(colors.blue)
                         .onTapGesture {
-                            dismiss() // Regresa a la vista anterior (LoginView)
+                            print("Dismiss tapped, returning to LoginView")
+                            dismiss()
                         }
-                }
-
-                // Navegación a RegisterMedicalHistoryView
-                .navigationDestination(isPresented: $navigateToMedicalHistory) {
-                    RegisterMedicalHistoryView()
-                        .environmentObject(authViewModel)
                 }
             }
             .padding(.horizontal, 24)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationDestination(isPresented: $navigateToMedicalHistory) {
+                RegisterMedicalHistoryView()
+                    .environmentObject(authViewModel)
+            }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            print("RegisterView appeared, clearing errorMessage")
+            authViewModel.errorMessage = ""
+        }
     }
 }
 
