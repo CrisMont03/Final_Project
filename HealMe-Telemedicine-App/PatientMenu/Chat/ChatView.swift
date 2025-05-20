@@ -21,32 +21,52 @@ struct ChatView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 16) {
-                    Text("Asistente Virtual")
-                        .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .foregroundColor(.black)
-                        .padding(.top, 35)
+                    VStack(spacing: 0) {
+                        Text("Asistente Virtual")
+                            .font(.system(size: 28, weight: .medium, design: .rounded))
+                            .foregroundColor(.black)
+                        Text("¿Tienes alguna duda?")
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.top, 35)
+                    .padding(.bottom, 15)
                     
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(messages, id: \.content) { message in
-                                ChatBubble(
-                                    role: message.role,
-                                    content: message.content,
-                                    isUser: message.role == "user",
-                                    maxWidth: geometry.size.width * 0.75
-                                )
+                    // White container for messages and error
+                    VStack(spacing: 0) {
+                        ScrollView {
+                            VStack(spacing: 12) {
+                                ForEach(messages, id: \.content) { message in
+                                    ChatBubble(
+                                        role: message.role,
+                                        content: message.content,
+                                        isUser: message.role == "user",
+                                        maxWidth: geometry.size.width * 0.75
+                                    )
+                                }
                             }
-                        }
-                        .padding(.horizontal, 16)
-                        .frame(maxWidth: geometry.size.width)
-                    }
-                    
-                    if let errorMessage = errorMessage {
-                        Text(errorMessage)
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(colors.red)
                             .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .frame(maxWidth: geometry.size.width)
+                        }
+                        
+                        if let errorMessage = errorMessage {
+                            Text(errorMessage)
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(colors.red)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 12)
+                        }
                     }
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(colors.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 16)
+                    
+                    Spacer()
                     
                     HStack {
                         TextField("Escribe tu consulta...", text: $inputText)
@@ -83,7 +103,6 @@ struct ChatView: View {
             return
         }
         
-        // Añadir mensaje del usuario
         messages.append((role: "user", content: inputText))
         let userMessage = inputText
         inputText = ""

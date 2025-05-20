@@ -23,7 +23,7 @@ struct ContentView: View {
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                 } else if authViewModel.userIsLoggedIn {
                     if authViewModel.isDoctor {
-                        DoctorView()
+                        DoctorMenuView()
                             .environmentObject(authViewModel)
                     } else if authViewModel.isPatientRegistrationComplete {
                         PatientMenuView() // Cambiado de InicioView a PatientMenuView
