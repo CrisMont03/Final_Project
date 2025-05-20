@@ -13,6 +13,7 @@ struct InicioDoctorView: View {
     @State private var doctorData: DoctorData = DoctorData()
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var isEditing = false
     
     private let db = Firestore.firestore()
     private let colors = (
@@ -33,7 +34,7 @@ struct InicioDoctorView: View {
             } else if let errorMessage = errorMessage {
                 ErrorView(errorMessage: errorMessage, colors: colors, retryAction: fetchDoctorData)
             } else {
-                ContentView(doctorData: doctorData, colors: colors)
+                ContentView(doctorData: doctorData, isEditing: $isEditing, colors: colors)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -88,59 +89,100 @@ struct InicioDoctorView: View {
     
     private struct ContentView: View {
         let doctorData: DoctorData
+        @Binding var isEditing: Bool
         let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
         
         var body: some View {
             VStack(spacing: 16) {
-                Text("Buenos días, Dr. \(doctorData.name.isEmpty ? "Doctor" : doctorData.name)")
-                    .font(.system(size: 28, weight: .medium, design: .rounded))
-                    .foregroundColor(.black)
-                    .padding(.top, 35)
-                
-                Text("Perfil profesional")
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(.gray)
-                    .padding(.bottom, 25)
-                
-                // White container for doctor fields
-                VStack(spacing: 0) {
-                    HStack {
-                        Text("Campo")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(colors.blue)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text("Valor")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                // Welcome header with icon and date
+                VStack(spacing: 8) {
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(colors.blue)
+                    HStack(spacing: 8) {
+                        Text("¡\(greeting())!")
+                            .font(.system(size: 28, weight: .medium, design: .rounded))
                             .foregroundColor(.black)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .padding(.vertical, 14)
+                    Text("21 de mayo de 2025")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(colors.gray)
+                }
+                .padding(.top, 35)
+                .padding(.bottom, 10)
+                
+                // White container for doctor profile
+                VStack(spacing: 0) {
+                    // Profile card header
+                    VStack(spacing: 8) {
+                        Text("Dr. " + (doctorData.name.isEmpty ? "Perfil del Doctor" : doctorData.name))
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundColor(.black)
+                        if !doctorData.specialty.isEmpty {
+                            Text(doctorData.specialty)
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.vertical, 4)
+                                .padding(.horizontal, 12)
+                                .background(colors.blue)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.vertical, 16)
                     .padding(.horizontal, 16)
                     .background(Color.white)
                     
                     Divider()
                         .background(colors.gray.opacity(0.3))
                     
-                    DoctorField(label: "Nombre", value: doctorData.name)
+                    // Doctor fields
+                    DoctorField(label: "Nombre", value: doctorData.name, icon: "person.fill", colors: colors)
                     Divider().background(colors.gray.opacity(0.3))
-                    DoctorField(label: "Correo", value: doctorData.email)
+                    DoctorField(label: "Correo", value: doctorData.email, icon: "envelope.fill", colors: colors)
                     Divider().background(colors.gray.opacity(0.3))
-                    DoctorField(label: "Certificado Médico", value: doctorData.medicalCertificate)
+                    DoctorField(label: "Certificado Médico", value: doctorData.medicalCertificate, icon: "doc.text.fill", colors: colors)
                     Divider().background(colors.gray.opacity(0.3))
-                    DoctorField(label: "Teléfono", value: doctorData.phone)
+                    DoctorField(label: "Teléfono", value: doctorData.phone, icon: "phone.fill", colors: colors)
                     Divider().background(colors.gray.opacity(0.3))
-                    DoctorField(label: "Especialidad", value: doctorData.specialty)
+                    DoctorField(label: "Especialidad", value: doctorData.specialty, icon: "stethoscope", colors: colors)
                 }
                 .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 16)
                         .stroke(colors.gray.opacity(0.3), lineWidth: 1)
                 )
+                .shadow(color: colors.gray.opacity(0.2), radius: 4, x: 0, y: 2)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 17)
                 
-                Spacer()
+                // Edit button
+                Button(action: { isEditing = true }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Editar perfil")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(colors.red)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal, 16)
+                
+            }
+        }
+        
+        private func greeting() -> String {
+            let hour = Calendar.current.component(.hour, from: Date())
+            switch hour {
+            case 0..<12:
+                return "Buenos días"
+            case 12..<18:
+                return "Buenas tardes"
+            default:
+                return "Buenas noches" // Current time (10:22 PM) will use this
             }
         }
     }
@@ -150,20 +192,29 @@ struct InicioDoctorView: View {
     private struct DoctorField: View {
         let label: String
         let value: String
+        let icon: String
+        let colors: (red: Color, green: Color, blue: Color, background: Color, gray: Color)
         
         var body: some View {
-            HStack {
-                Text(label)
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .foregroundColor(colors.blue)
+                    .frame(width: 24)
                 
-                Text(value.isEmpty ? "No registrado" : value)
-                    .font(.system(size: 16, design: .rounded))
-                    .foregroundColor(value.isEmpty ? .gray : .black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(label)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(colors.blue)
+                    Text(value.isEmpty ? "No registrado" : value)
+                        .font(.system(size: 16, design: .rounded))
+                        .foregroundColor(value.isEmpty ? colors.gray : .black)
+                        .lineLimit(2)
+                }
+                
+                Spacer()
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 12)
             .padding(.horizontal, 16)
         }
     }
