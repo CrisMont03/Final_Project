@@ -38,6 +38,7 @@ struct DiagnosisFormView: View {
     @State private var prescription: String = ""
     @State private var errorMessage: String = ""
     @State private var isSubmitting: Bool = false
+    @State private var showPermissionAlert: Bool = false
     @Environment(\.dismiss) var dismiss
 
     private let colors = (
@@ -171,12 +172,25 @@ struct DiagnosisFormView: View {
                     .padding(.bottom, 16)
                 }
             }
+            .alert(isPresented: $showPermissionAlert) {
+                Alert(
+                    title: Text("Habilitar Notificaciones"),
+                    message: Text("Para recibir confirmaciones de recetas, habilita las notificaciones en Ajustes."),
+                    primaryButton: .default(Text("Ajustes")) {
+                        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsURL)
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
         }
     }
 
     private func submitDiagnosis() {
         guard let doctorId = authViewModel.currentUserId else {
             errorMessage = "No se pudo obtener el ID del médico"
+            isSubmitting = false
             return
         }
 
@@ -242,21 +256,25 @@ struct DiagnosisFormView: View {
     }
 
     private func sendLocalNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Receta Enviada"
-        content.body = "La receta para \(appointment.patientName) ha sido enviada correctamente."
-        content.sound = UNNotificationSound.default
-
-        // Disparar la notificación inmediatamente
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error sending local notification: \(error.localizedDescription)")
-            } else {
-                print("Local notification scheduled successfully")
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized else {
+                print("Permissions not granted")
+                DispatchQueue.main.async {
+                    self.showPermissionAlert = true
+                }
+                return
+            }
+            let content = UNMutableNotificationContent()
+            content.title = "Receta Enviada"
+            content.body = "La receta para \(self.appointment.patientName) ha sido enviada."
+            content.sound = .default
+            content.badge = NSNumber(value: UIApplication.shared.applicationIconBadgeNumber + 1)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request) { error in
+                print("Notification error: \(error?.localizedDescription ?? "none")")
             }
         }
     }
 }
+
