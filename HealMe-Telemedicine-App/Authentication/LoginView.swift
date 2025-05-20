@@ -118,7 +118,7 @@ struct LoginView: View {
                 // Redirección basada en el estado de autenticación
                 .navigationDestination(isPresented: $authViewModel.userIsLoggedIn) {
                     if authViewModel.isDoctor {
-                        DoctorView()
+                        InicioDoctorView()
                             .environmentObject(authViewModel)
                     } else if authViewModel.isPatientRegistrationComplete {
                         InicioView()
