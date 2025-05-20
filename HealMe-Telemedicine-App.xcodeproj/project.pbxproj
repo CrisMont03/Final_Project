@@ -27,6 +27,7 @@
 		7ADF154A2DDB1E4A002ED00A /* VideoCodecDec in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15492DDB1E4A002ED00A /* VideoCodecDec */; };
 		7ADF154C2DDB1E4A002ED00A /* VideoCodecEnc in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF154B2DDB1E4A002ED00A /* VideoCodecEnc */; };
 		7ADF154E2DDB1E4A002ED00A /* VirtualBackground in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF154D2DDB1E4A002ED00A /* VirtualBackground */; };
+		7ADF15562DDBD2CF002ED00A /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15552DDBD2CF002ED00A /* FirebaseVertexAI */; };
 		7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */; };
 		7AE116CF2DD80CCE00BED0F7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116CE2DD80CCE00BED0F7 /* FirebaseCore */; };
 		7AE116D12DD80CCE00BED0F7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7AE116D02DD80CCE00BED0F7 /* FirebaseDatabase */; };
@@ -91,6 +92,7 @@
 				7ADF154A2DDB1E4A002ED00A /* VideoCodecDec in Frameworks */,
 				7ADF15382DDB1E4A002ED00A /* FaceCapture in Frameworks */,
 				7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */,
+				7ADF15562DDBD2CF002ED00A /* FirebaseVertexAI in Frameworks */,
 				7ADF15402DDB1E4A002ED00A /* RtcBasic in Frameworks */,
 				7ADF154E2DDB1E4A002ED00A /* VirtualBackground in Frameworks */,
 			);
@@ -99,10 +101,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7ADF15542DDBD2CF002ED00A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		7AE116B02DD8053E00BED0F7 = {
 			isa = PBXGroup;
 			children = (
 				7AE116BB2DD8053E00BED0F7 /* HealMe-Telemedicine-App */,
+				7ADF15542DDBD2CF002ED00A /* Frameworks */,
 				7AE116BA2DD8053E00BED0F7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -162,6 +172,7 @@
 				7ADF15492DDB1E4A002ED00A /* VideoCodecDec */,
 				7ADF154B2DDB1E4A002ED00A /* VideoCodecEnc */,
 				7ADF154D2DDB1E4A002ED00A /* VirtualBackground */,
+				7ADF15552DDBD2CF002ED00A /* FirebaseVertexAI */,
 			);
 			productName = "HealMe-Telemedicine-App";
 			productReference = 7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */;
@@ -559,6 +570,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7ADF15282DDB1E4A002ED00A /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
 			productName = VirtualBackground;
+		};
+		7ADF15552DDBD2CF002ED00A /* FirebaseVertexAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseVertexAI;
 		};
 		7AE116CC2DD80CCE00BED0F7 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
