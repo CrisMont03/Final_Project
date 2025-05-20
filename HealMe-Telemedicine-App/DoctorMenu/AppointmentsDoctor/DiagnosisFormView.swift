@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseFirestore
+import UserNotifications
 
 struct Prescription: Identifiable {
     let id: String
@@ -229,6 +230,9 @@ struct DiagnosisFormView: View {
                             print("Error al crear notificación: \(error.localizedDescription)")
                         }
 
+                        // Enviar notificación local al médico
+                        sendLocalNotification()
+
                         isSubmitting = false
                         dismiss()
                         onDismiss()
@@ -236,5 +240,23 @@ struct DiagnosisFormView: View {
                 }
             }
     }
-}
 
+    private func sendLocalNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Receta Enviada"
+        content.body = "La receta para \(appointment.patientName) ha sido enviada correctamente."
+        content.sound = UNNotificationSound.default
+
+        // Disparar la notificación inmediatamente
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error sending local notification: \(error.localizedDescription)")
+            } else {
+                print("Local notification scheduled successfully")
+            }
+        }
+    }
+}

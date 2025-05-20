@@ -9,6 +9,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import Foundation
 import FirebaseCore
+import UserNotifications // Import for notifications
 
 class AuthViewModel: ObservableObject {
     @Published var errorMessage: String = ""
@@ -684,4 +685,3 @@ class AuthViewModel: ObservableObject {
             }
         }
 }
-
