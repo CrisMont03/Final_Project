@@ -52,83 +52,122 @@ struct DiagnosisFormView: View {
                 colors.background
                     .ignoresSafeArea()
 
-                VStack(spacing: 16) {
-                    Text("Formulario de Diagnóstico")
-                        .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .foregroundColor(.black)
-                        .padding(.top, 16)
+                VStack(spacing: 20) {
+                    VStack(spacing: 0) {
+                        Text("Receta Médica")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(.black)
+                        // Patient Info
+                        HStack {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(colors.green)
+                                .font(.system(size: 18))
+                            Text("Paciente: \(appointment.patientName)")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding(.top, 16)
 
-                    Text("Paciente: \(appointment.patientName)")
-                        .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(.gray)
-
-                    TextEditor(text: $diagnosis)
-                        .frame(height: 100)
-                        .padding(8)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
-                        .padding(.horizontal, 16)
-                        .overlay(
+                    // Diagnosis Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "doc.text.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
                             Text("Diagnóstico")
-                                .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(.gray)
-                                .padding(.leading, 20)
-                                .offset(y: -110),
-                            alignment: .leading
-                        )
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(.black)
+                        }
+                        TextEditor(text: $diagnosis)
+                            .frame(height: 120)
+                            .padding(12)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+                    }
+                    .padding(.horizontal, 16)
 
-                    TextEditor(text: $prescription)
-                        .frame(height: 100)
-                        .padding(8)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
-                        .padding(.horizontal, 16)
-                        .overlay(
+                    // Prescription Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "pills.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
                             Text("Receta")
-                                .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(.gray)
-                                .padding(.leading, 20)
-                                .offset(y: -110),
-                            alignment: .leading
-                        )
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(.black)
+                        }
+                        TextEditor(text: $prescription)
+                            .frame(height: 120)
+                            .padding(12)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+                    }
+                    .padding(.horizontal, 16)
 
+                    // Error Message
                     if !errorMessage.isEmpty {
-                        Text(errorMessage)
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(colors.red)
-                            .padding(.horizontal, 16)
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(colors.red)
+                                .font(.system(size: 16))
+                            Text(errorMessage)
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(colors.red)
+                        }
+                        .padding(.horizontal, 16)
                     }
 
-                    Button(action: {
-                        submitDiagnosis()
-                    }) {
-                        Text(isSubmitting ? "Enviando..." : "Enviar")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
+                    // Buttons
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            submitDiagnosis()
+                        }) {
+                            HStack {
+                                Image(systemName: "paperplane.fill")
+                                    .foregroundColor(.white)
+                                Text(isSubmitting ? "Enviando..." : "Enviar")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(diagnosis.isEmpty || prescription.isEmpty || isSubmitting ? .gray : colors.blue)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                        }
+                        .disabled(diagnosis.isEmpty || prescription.isEmpty || isSubmitting)
+                        
+                        Button(action: {
+                            dismiss()
+                            onDismiss()
+                        }) {
+                            HStack {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.white)
+                                Text("Cancelar")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(colors.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                        }
                     }
-                    .disabled(diagnosis.isEmpty || prescription.isEmpty || isSubmitting)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") {
-                        dismiss()
-                        onDismiss()
-                    }
                 }
             }
         }
@@ -143,7 +182,6 @@ struct DiagnosisFormView: View {
         isSubmitting = true
         errorMessage = ""
 
-        // Buscar el ID del paciente
         let db = Firestore.firestore()
         db.collection("patients")
             .whereField("name", isEqualTo: appointment.patientName)
@@ -173,7 +211,6 @@ struct DiagnosisFormView: View {
                     "createdAt": Timestamp()
                 ]
 
-                // Guardar la receta
                 db.collection("prescriptions").addDocument(data: prescriptionData) { error in
                     if let error = error {
                         errorMessage = "Error al guardar la receta: \(error.localizedDescription)"
@@ -181,7 +218,6 @@ struct DiagnosisFormView: View {
                         return
                     }
 
-                    // Crear notificación para el paciente
                     let notificationData: [String: Any] = [
                         "patientId": patientId,
                         "message": "El Dr. \(authViewModel.doctorData?["name"] as? String ?? "Desconocido") ha enviado una nueva receta",
@@ -201,3 +237,4 @@ struct DiagnosisFormView: View {
             }
     }
 }
+

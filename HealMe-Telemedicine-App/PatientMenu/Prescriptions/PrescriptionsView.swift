@@ -32,11 +32,11 @@ struct PrescriptionsView: View {
                         Text("Mis Recetas")
                             .font(.system(size: 28, weight: .medium, design: .rounded))
                             .foregroundColor(.black)
-                        Text("Consulta tus recetas médicas")
+                        Text("Consulta tus recetas médicas:")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(.gray)
                     }
-                    .padding(.top, 35)
+                    .padding(.top, 15)
                     .padding(.bottom, 12)
 
                     if !errorMessage.isEmpty {
@@ -106,16 +106,19 @@ struct PrescriptionsView: View {
                         .font(.system(size: 18, weight: .medium, design: .rounded))
                         .foregroundColor(.black)
                 }
-                Text("Fecha: \(prescription.date) - \(prescription.hour)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.blue)
-                Text("Diagnóstico: \(prescription.diagnosis)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.black)
-                Text("Receta: \(prescription.prescription)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.black)
+                VStack(spacing: 0) {
+                    Text("Fecha: \(prescription.date) - \(prescription.hour)")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.blue)
+                    Text("Diagnóstico: \(prescription.diagnosis)")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.black)
+                    Text("Receta: \(prescription.prescription)")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.black)
+                }
             }
+            .frame(maxWidth: .infinity)
             .padding(12)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 12))
