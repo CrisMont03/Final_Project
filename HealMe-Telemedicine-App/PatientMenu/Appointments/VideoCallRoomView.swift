@@ -23,10 +23,10 @@ struct VideoCallRoomView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
-                Text("Videollamada con Dr. \(appointment.doctorName)")
+                Text("Videollamada")
                     .font(.system(size: 24, weight: .medium, design: .rounded))
                     .foregroundColor(.black)
-                    .padding(.top, 16)
+                    .padding(.top, 20)
                 
                 AgoraVideoCallView(
                     appointment: appointment,
@@ -93,7 +93,7 @@ struct VideoCallRoomView: View {
                             Text("Volver")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
+                                .frame(width: 200)
                                 .padding()
                                 .background(colors.blue)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
