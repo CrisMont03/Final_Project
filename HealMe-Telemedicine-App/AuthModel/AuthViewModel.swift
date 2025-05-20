@@ -5,13 +5,6 @@
 //  Created by Cristian Montiel García on 16/05/25.
 //
 
-//
-//  AuthViewModel.swift
-//  HealMe-Telemedicine-App
-//
-//  Created by Cristian Montiel García on 16/05/25.
-//
-
 import FirebaseAuth
 import FirebaseFirestore
 import Foundation
@@ -172,7 +165,7 @@ class AuthViewModel: ObservableObject {
                 "name": name,
                 "createdAt": Timestamp(),
                 "isDoctor": false,
-                "appointments": [] // Inicializar appointments
+                "appointments": []
             ]
             print("Saving patient data to Firestore: \(patientData)")
             self.db.collection("patients").document(user.uid).setData(patientData) { error in
@@ -371,7 +364,6 @@ class AuthViewModel: ObservableObject {
 
         print("Starting createAppointment for userId: \(userId), doctorId: \(appointment.doctorId), patientName: \(patientName)")
 
-        // Verificar documento del paciente
         db.collection("patients").document(userId).getDocument { snapshot, error in
             print("Checking patient document for userId: \(userId)")
             if let error = error {
@@ -390,7 +382,6 @@ class AuthViewModel: ObservableObject {
 
             print("Patient document exists, checking doctor document")
 
-            // Verificar documento del doctor
             self.db.collection("doctors").document(appointment.doctorId).getDocument { snapshot, error in
                 print("Checking doctor document for doctorId: \(appointment.doctorId)")
                 if let error = error {
@@ -407,7 +398,6 @@ class AuthViewModel: ObservableObject {
                     return
                 }
 
-                // Inicializar appointments en el doctor si no existe
                 let doctorData = snapshot?.data()
                 if doctorData?["appointments"] == nil {
                     print("Initializing appointments array for doctorId: \(appointment.doctorId)")
@@ -485,5 +475,91 @@ class AuthViewModel: ObservableObject {
                 completion([])
             }
         }
+    }
+
+    func fetchDoctorAppointments(doctorId: String, completion: @escaping ([AppointmentDoctor]) -> Void) {
+        print("Fetching appointments for doctorId: \(doctorId)")
+        db.collection("doctors").document(doctorId).getDocument { (snapshot: DocumentSnapshot?, error: Error?) in
+            if let error = error {
+                print("Error fetching doctor appointments: \(error.localizedDescription)")
+                completion([])
+                return
+            }
+            
+            guard let data = snapshot?.data(),
+                  let appointmentsData = data["appointments"] as? [[String: Any]] else {
+                print("No appointments found for doctorId: \(doctorId)")
+                completion([])
+                return
+            }
+            
+            let appointments = appointmentsData.compactMap { dict -> AppointmentDoctor? in
+                guard let date = dict["date"] as? String,
+                      let hour = dict["hour"] as? String,
+                      let patientName = dict["patientName"] as? String else {
+                    return nil
+                }
+                return AppointmentDoctor(id: UUID(), date: date, hour: hour, patientName: patientName)
+            }
+            
+            let sortedAppointments = appointments.sorted { (appt1, appt2) in
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                let date1 = dateFormatter.date(from: "\(appt1.date) \(appt1.hour)") ?? Date.distantFuture
+                let date2 = dateFormatter.date(from: "\(appt2.date) \(appt2.hour)") ?? Date.distantFuture
+                return date1 < date2
+            }
+            
+            completion(sortedAppointments)
+        }
+    }
+
+    func fetchPatientAppointmentId(doctorId: String, date: String, hour: String, completion: @escaping (String?) -> Void) {
+        print("Fetching patient appointment ID for doctorId: \(doctorId), date: \(date), hour: \(hour)")
+        db.collection("patients")
+            .whereField("appointments", arrayContains: [
+                "doctorId": doctorId,
+                "date": date,
+                "hour": hour
+            ])
+            .getDocuments { (snapshot: QuerySnapshot?, error: Error?) in
+                if let error = error {
+                    print("Error fetching patient appointment: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let documents = snapshot?.documents, !documents.isEmpty,
+                      let patientData = documents.first?.data(),
+                      let appointmentsData = patientData["appointments"] as? [[String: Any]] else {
+                    print("No matching patient appointment found")
+                    completion(nil)
+                    return
+                }
+                
+                if let matchingAppointment = appointmentsData.first(where: { appt in
+                    appt["doctorId"] as? String == doctorId &&
+                    appt["date"] as? String == date &&
+                    appt["hour"] as? String == hour
+                }) {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: [matchingAppointment])
+                        let appointments = try JSONDecoder().decode([Appointment].self, from: jsonData)
+                        if let appointment = appointments.first {
+                            print("Found patient appointment ID: \(appointment.id.uuidString)")
+                            completion(appointment.id.uuidString)
+                        } else {
+                            print("Failed to decode appointment ID")
+                            completion(nil)
+                        }
+                    } catch {
+                        print("Error decoding patient appointment: \(error.localizedDescription)")
+                        completion(nil)
+                    }
+                } else {
+                    print("No matching appointment in patient data")
+                    completion(nil)
+                }
+            }
     }
 }
