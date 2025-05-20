@@ -14,6 +14,7 @@ struct VideoCallRoomDoctorView: View {
     @StateObject private var agoraManager = AgoraManager()
     let channelName: String
     let appointment: AppointmentDoctor
+    let onCallEnded: () -> Void // Nuevo cierre
     @State private var isLocalMuted: Bool = false
     @State private var isLocalCameraOn: Bool = true
     @State private var errorMessage: String = ""
@@ -23,7 +24,6 @@ struct VideoCallRoomDoctorView: View {
             Color(.systemBackground).ignoresSafeArea()
             
             VStack {
-                // Remote video (patient's video)
                 if (agoraManager.remoteCanvas?.view) != nil {
                     ZStack {
                         AgoraVideoCanvasView(canvas: agoraManager.remoteCanvas)
@@ -52,7 +52,6 @@ struct VideoCallRoomDoctorView: View {
                         .padding()
                 }
                 
-                // Local video (doctor's video)
                 if (agoraManager.localCanvas?.view) != nil {
                     AgoraVideoCanvasView(canvas: agoraManager.localCanvas)
                         .aspectRatio(1.0, contentMode: .fit)
@@ -66,7 +65,6 @@ struct VideoCallRoomDoctorView: View {
                         .padding(.bottom, 20)
                 }
                 
-                // Controls
                 HStack(spacing: 30) {
                     Button(action: {
                         isLocalMuted.toggle()
@@ -95,7 +93,6 @@ struct VideoCallRoomDoctorView: View {
                     Button(action: {
                         agoraManager.leaveChannel()
                         
-                        // Eliminar el channelName de Firestore
                         let db = Firestore.firestore()
                         db.collection("active_calls")
                             .whereField("channelName", isEqualTo: channelName)
@@ -117,6 +114,7 @@ struct VideoCallRoomDoctorView: View {
                                 }
                             }
                         
+                        onCallEnded() // Llamar al cierre
                         dismiss()
                     }) {
                         Image(systemName: "phone.down.fill")

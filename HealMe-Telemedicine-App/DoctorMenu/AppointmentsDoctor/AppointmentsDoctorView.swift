@@ -20,6 +20,8 @@ struct AppointmentsDoctorView: View {
     @State private var errorMessage: String = ""
     @State private var selectedVideoCallAppointment: AppointmentDoctor?
     @State private var channelName: String?
+    @State private var showDiagnosisModal: Bool = false // Estado para el modal
+    @State private var completedAppointment: AppointmentDoctor? // Cita completada
 
     private let colors = (
         red: Color(hex: "D40035"),
@@ -97,11 +99,34 @@ struct AppointmentsDoctorView: View {
             .navigationBarHidden(true)
             .navigationDestination(isPresented: Binding(
                 get: { selectedVideoCallAppointment != nil && channelName != nil },
-                set: { if !$0 { selectedVideoCallAppointment = nil; channelName = nil } }
+                set: { if !$0 {
+                    if let completed = selectedVideoCallAppointment {
+                        completedAppointment = completed
+                        showDiagnosisModal = true
+                    }
+                    selectedVideoCallAppointment = nil
+                    channelName = nil
+                } }
             )) {
                 if let appointment = selectedVideoCallAppointment, let channelName = channelName {
-                    VideoCallRoomDoctorView(channelName: channelName, appointment: appointment)
-                        .environmentObject(authViewModel)
+                    VideoCallRoomDoctorView(
+                        channelName: channelName,
+                        appointment: appointment,
+                        onCallEnded: {
+                            completedAppointment = appointment
+                            showDiagnosisModal = true
+                        }
+                    )
+                    .environmentObject(authViewModel)
+                }
+            }
+            .sheet(isPresented: $showDiagnosisModal) {
+                if let appointment = completedAppointment {
+                    DiagnosisFormView(
+                        appointment: appointment,
+                        authViewModel: authViewModel,
+                        onDismiss: { showDiagnosisModal = false }
+                    )
                 }
             }
             .onAppear {

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7A89B2262DD89B36006B0241 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 7A89B2252DD89B36006B0241 /* SwiftUICharts */; };
+		7AC0EB582DDCF3F60093331D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 7AC0EB572DDCF3F60093331D /* FirebaseMessaging */; };
 		7ADF152A2DDB1E4A002ED00A /* AIAEC in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF15292DDB1E4A002ED00A /* AIAEC */; };
 		7ADF152C2DDB1E4A002ED00A /* AIAECLL in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF152B2DDB1E4A002ED00A /* AIAECLL */; };
 		7ADF152E2DDB1E4A002ED00A /* AINS in Frameworks */ = {isa = PBXBuildFile; productRef = 7ADF152D2DDB1E4A002ED00A /* AINS */; };
@@ -93,6 +94,7 @@
 				7ADF15382DDB1E4A002ED00A /* FaceCapture in Frameworks */,
 				7AE116CD2DD80CCE00BED0F7 /* FirebaseAuth in Frameworks */,
 				7ADF15562DDBD2CF002ED00A /* FirebaseVertexAI in Frameworks */,
+				7AC0EB582DDCF3F60093331D /* FirebaseMessaging in Frameworks */,
 				7ADF15402DDB1E4A002ED00A /* RtcBasic in Frameworks */,
 				7ADF154E2DDB1E4A002ED00A /* VirtualBackground in Frameworks */,
 			);
@@ -173,6 +175,7 @@
 				7ADF154B2DDB1E4A002ED00A /* VideoCodecEnc */,
 				7ADF154D2DDB1E4A002ED00A /* VirtualBackground */,
 				7ADF15552DDBD2CF002ED00A /* FirebaseVertexAI */,
+				7AC0EB572DDCF3F60093331D /* FirebaseMessaging */,
 			);
 			productName = "HealMe-Telemedicine-App";
 			productReference = 7AE116B92DD8053E00BED0F7 /* HealMe-Telemedicine-App.app */;
@@ -475,6 +478,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A89B2242DD89B36006B0241 /* XCRemoteSwiftPackageReference "ChartView" */;
 			productName = SwiftUICharts;
+		};
+		7AC0EB572DDCF3F60093331D /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AE116CB2DD80AA400BED0F7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		7ADF15292DDB1E4A002ED00A /* AIAEC */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -596,5 +596,92 @@ class AuthViewModel: ObservableObject {
                 completion(channelName)
             }
     }
+    
+    func fetchPatientPrescriptions(patientId: String, completion: @escaping ([Prescription]) -> Void) {
+            print("Fetching prescriptions for patientId: \(patientId)")
+            db.collection("prescriptions")
+                .whereField("patientId", isEqualTo: patientId)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        print("Error fetching prescriptions: \(error.localizedDescription)")
+                        completion([])
+                        return
+                    }
+
+                    let prescriptions = snapshot?.documents.compactMap { doc -> Prescription? in
+                        let data = doc.data()
+                        guard let patientId = data["patientId"] as? String,
+                              let patientName = data["patientName"] as? String,
+                              let doctorId = data["doctorId"] as? String,
+                              let doctorName = data["doctorName"] as? String,
+                              let date = data["date"] as? String,
+                              let hour = data["hour"] as? String,
+                              let diagnosis = data["diagnosis"] as? String,
+                              let prescription = data["prescription"] as? String,
+                              let createdAt = data["createdAt"] as? Timestamp else {
+                            return nil
+                        }
+                        return Prescription(
+                            id: doc.documentID,
+                            patientId: patientId,
+                            patientName: patientName,
+                            doctorId: doctorId,
+                            doctorName: doctorName,
+                            date: date,
+                            hour: hour,
+                            diagnosis: diagnosis,
+                            prescription: prescription,
+                            createdAt: createdAt
+                        )
+                    } ?? []
+                    completion(prescriptions.sorted { $0.createdAt.dateValue() > $1.createdAt.dateValue() })
+                }
+        }
+
+        func fetchPatientNotifications(patientId: String, completion: @escaping ([Notification]) -> Void) {
+            print("Fetching notifications for patientId: \(patientId)")
+            db.collection("notifications")
+                .whereField("patientId", isEqualTo: patientId)
+                .whereField("read", isEqualTo: false)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        print("Error fetching notifications: \(error.localizedDescription)")
+                        completion([])
+                        return
+                    }
+
+                    let notifications = snapshot?.documents.compactMap { doc -> Notification? in
+                        let data = doc.data()
+                        guard let patientId = data["patientId"] as? String,
+                              let message = data["message"] as? String,
+                              let createdAt = data["createdAt"] as? Timestamp,
+                              let read = data["read"] as? Bool else {
+                            return nil
+                        }
+                        return Notification(
+                            id: doc.documentID,
+                            patientId: patientId,
+                            message: message,
+                            createdAt: createdAt,
+                            read: read
+                        )
+                    } ?? []
+                    completion(notifications.sorted { $0.createdAt.dateValue() > $1.createdAt.dateValue() })
+                }
+        }
+
+        func markNotificationAsRead(notificationId: String, completion: @escaping (Bool) -> Void) {
+            print("Marking notification as read: \(notificationId)")
+            db.collection("notifications").document(notificationId).updateData([
+                "read": true
+            ]) { error in
+                if let error = error {
+                    print("Error marking notification as read: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    completion(true)
+                }
+            }
+        }
 }
 
