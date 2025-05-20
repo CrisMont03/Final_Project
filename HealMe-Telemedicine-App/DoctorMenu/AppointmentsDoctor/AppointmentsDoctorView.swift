@@ -66,20 +66,22 @@ struct AppointmentsDoctorView: View {
                                     AppointmentCardView(appointment: appointment, onJoinVideoCall: {
                                         guard let doctorId = authViewModel.currentUserId else {
                                             errorMessage = "No se pudo obtener el ID del médico"
+                                            print("No doctorId available")
                                             return
                                         }
-                                        authViewModel.fetchPatientAppointmentId(
+                                        authViewModel.fetchChannelName(
                                             doctorId: doctorId,
                                             date: appointment.date,
-                                            hour: appointment.hour
-                                        ) { appointmentId in
-                                            if let appointmentId = appointmentId {
+                                            hour: appointment.hour,
+                                            patientName: appointment.patientName
+                                        ) { channelName in
+                                            if let channelName = channelName {
                                                 selectedVideoCallAppointment = appointment
-                                                channelName = "healme_\(appointmentId)"
-                                                print("Joining video call for appointment: \(appointment), channelName: \(channelName ?? "nil")")
+                                                self.channelName = channelName
+                                                print("Joining video call for appointment: \(appointment), channelName: \(channelName)")
                                             } else {
-                                                errorMessage = "No se pudo encontrar la cita del paciente"
-                                                print("Failed to fetch patient appointment ID")
+                                                errorMessage = "No se pudo encontrar el canal de la videollamada"
+                                                print("Failed to fetch channelName")
                                             }
                                         }
                                     })
@@ -98,7 +100,7 @@ struct AppointmentsDoctorView: View {
                 set: { if !$0 { selectedVideoCallAppointment = nil; channelName = nil } }
             )) {
                 if let appointment = selectedVideoCallAppointment, let channelName = channelName {
-                    VideoCallRoomDoctorView(appointment: appointment, channelName: channelName)
+                    VideoCallRoomDoctorView(channelName: channelName, appointment: appointment)
                         .environmentObject(authViewModel)
                 }
             }
@@ -175,3 +177,4 @@ struct AppointmentsDoctorView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+

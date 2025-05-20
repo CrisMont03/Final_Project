@@ -1,6 +1,8 @@
 import SwiftUI
+import FirebaseCore
 import AgoraRtcKit
 import AVFoundation
+import FirebaseFirestore
 
 struct VideoCallRoomView: View {
     let appointment: Appointment
@@ -40,6 +42,15 @@ struct VideoCallRoomView: View {
                 .padding(.horizontal, 16)
                 
                 Button(action: {
+                    // Eliminar el channelName de Firestore
+                    let db = Firestore.firestore()
+                    db.collection("active_calls").document(appointment.id.uuidString).delete { error in
+                        if let error = error {
+                            print("Error deleting channelName from Firestore: \(error.localizedDescription)")
+                        } else {
+                            print("channelName deleted successfully for appointment: \(appointment.id.uuidString)")
+                        }
+                    }
                     dismiss()
                 }) {
                     Text("Finalizar Videollamada")
@@ -65,6 +76,30 @@ struct VideoCallRoomView: View {
                         Text("Esperando al Dr. \(appointment.doctorName)")
                             .font(.system(size: 18, weight: .medium, design: .rounded))
                             .foregroundColor(.white)
+                        
+                        // Botón "Volver"
+                        Button(action: {
+                            // Eliminar el channelName de Firestore
+                            let db = Firestore.firestore()
+                            db.collection("active_calls").document(appointment.id.uuidString).delete { error in
+                                if let error = error {
+                                    print("Error deleting channelName from Firestore: \(error.localizedDescription)")
+                                } else {
+                                    print("channelName deleted successfully for appointment: \(appointment.id.uuidString)")
+                                }
+                            }
+                            dismiss()
+                        }) {
+                            Text("Volver")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(colors.blue)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 16)
                     }
                 }
             }
@@ -72,7 +107,27 @@ struct VideoCallRoomView: View {
         .navigationBarHidden(true)
         .onAppear {
             print("VideoCallRoomView appeared for appointment: \(appointment)")
-            print("Channel name for this call: healme_\(appointment.id.uuidString)")
+            let channelName = "healme_\(appointment.id.uuidString)"
+            print("Channel name for this call: \(channelName)")
+            
+            // Guardar el channelName en Firestore
+            let db = Firestore.firestore()
+            let callData: [String: Any] = [
+                "doctorId": appointment.doctorId,
+                "date": appointment.date,
+                "hour": appointment.hour,
+                "patientName": authViewModel.patientName,
+                "channelName": channelName,
+                "createdAt": Timestamp()
+            ]
+            
+            db.collection("active_calls").document(appointment.id.uuidString).setData(callData) { error in
+                if let error = error {
+                    print("Error saving channelName to Firestore: \(error.localizedDescription)")
+                } else {
+                    print("channelName saved successfully for appointment: \(appointment.id.uuidString)")
+                }
+            }
         }
     }
 }

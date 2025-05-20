@@ -514,14 +514,11 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func fetchPatientAppointmentId(doctorId: String, date: String, hour: String, completion: @escaping (String?) -> Void) {
-        print("Fetching patient appointment ID for doctorId: \(doctorId), date: \(date), hour: \(hour)")
+    func fetchPatientAppointmentId(doctorId: String, date: String, hour: String, patientName: String, completion: @escaping (String?) -> Void) {
+        print("Fetching patient appointment ID for doctorId: \(doctorId), date: \(date), hour: \(hour), patientName: \(patientName)")
+        
         db.collection("patients")
-            .whereField("appointments", arrayContains: [
-                "doctorId": doctorId,
-                "date": date,
-                "hour": hour
-            ])
+            .whereField("name", isEqualTo: patientName)
             .getDocuments { (snapshot: QuerySnapshot?, error: Error?) in
                 if let error = error {
                     print("Error fetching patient appointment: \(error.localizedDescription)")
@@ -529,37 +526,75 @@ class AuthViewModel: ObservableObject {
                     return
                 }
                 
-                guard let documents = snapshot?.documents, !documents.isEmpty,
-                      let patientData = documents.first?.data(),
-                      let appointmentsData = patientData["appointments"] as? [[String: Any]] else {
-                    print("No matching patient appointment found")
+                guard let documents = snapshot?.documents, !documents.isEmpty else {
+                    print("No patient documents found for patientName: \(patientName)")
+                    self.db.collection("patients").getDocuments { (allSnapshot, allError) in
+                        if let allError = allError {
+                            print("Error fetching all patients: \(allError.localizedDescription)")
+                        } else if let allDocs = allSnapshot?.documents {
+                            print("All patient documents: \(allDocs.map { ($0.documentID, $0.data()) })")
+                        }
+                    }
                     completion(nil)
                     return
                 }
                 
-                if let matchingAppointment = appointmentsData.first(where: { appt in
-                    appt["doctorId"] as? String == doctorId &&
-                    appt["date"] as? String == date &&
-                    appt["hour"] as? String == hour
-                }) {
-                    do {
-                        let jsonData = try JSONSerialization.data(withJSONObject: [matchingAppointment])
-                        let appointments = try JSONDecoder().decode([Appointment].self, from: jsonData)
-                        if let appointment = appointments.first {
-                            print("Found patient appointment ID: \(appointment.id.uuidString)")
-                            completion(appointment.id.uuidString)
-                        } else {
-                            print("Failed to decode appointment ID")
-                            completion(nil)
+                print("Found \(documents.count) patient documents for patientName: \(patientName)")
+                for document in documents {
+                    let patientId = document.documentID
+                    let data = document.data()
+                    print("Patient ID: \(patientId), Data: \(data)")
+                    
+                    if let appointmentsData = data["appointments"] as? [[String: Any]],
+                       let matchingAppointment = appointmentsData.first(where: { appt in
+                           appt["doctorId"] as? String == doctorId &&
+                           appt["date"] as? String == date &&
+                           appt["hour"] as? String == hour
+                       }) {
+                        do {
+                            let jsonData = try JSONSerialization.data(withJSONObject: [matchingAppointment])
+                            let appointments = try JSONDecoder().decode([Appointment].self, from: jsonData)
+                            if let appointment = appointments.first {
+                                print("Found patient appointment ID: \(appointment.id.uuidString)")
+                                completion(appointment.id.uuidString)
+                                return
+                            }
+                        } catch {
+                            print("Error decoding patient appointment: \(error.localizedDescription)")
                         }
-                    } catch {
-                        print("Error decoding patient appointment: \(error.localizedDescription)")
-                        completion(nil)
                     }
-                } else {
-                    print("No matching appointment in patient data")
-                    completion(nil)
                 }
+                
+                print("No matching appointment found in patient documents")
+                completion(nil)
+            }
+    }
+    
+    func fetchChannelName(doctorId: String, date: String, hour: String, patientName: String, completion: @escaping (String?) -> Void) {
+        print("Fetching channelName for doctorId: \(doctorId), date: \(date), hour: \(hour), patientName: \(patientName)")
+        
+        db.collection("active_calls")
+            .whereField("doctorId", isEqualTo: doctorId)
+            .whereField("date", isEqualTo: date)
+            .whereField("hour", isEqualTo: hour)
+            .whereField("patientName", isEqualTo: patientName)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching channelName: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let document = snapshot?.documents.first,
+                      let channelName = document.data()["channelName"] as? String else {
+                    print("No active call found for doctorId: \(doctorId), date: \(date), hour: \(hour), patientName: \(patientName)")
+                    completion(nil)
+                    return
+                }
+                
+                print("Found channelName: \(channelName)")
+                completion(channelName)
             }
     }
 }
+
