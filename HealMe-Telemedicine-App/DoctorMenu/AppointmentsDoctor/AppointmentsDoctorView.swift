@@ -140,7 +140,8 @@ struct AppointmentsDoctorView: View {
         let onJoinVideoCall: () -> Void
         private let colors = (
             blue: Color(hex: "007AFE"),
-            background: Color(hex: "F5F6F9")
+            background: Color(hex: "F5F6F9"),
+            green: Color(hex: "28A745")
         )
 
         var body: some View {

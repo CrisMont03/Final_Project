@@ -717,4 +717,47 @@ class AuthViewModel: ObservableObject {
                 completion(data)
             }
     }
+    
+    func fetchDoctorPrescriptions(doctorId: String, completion: @escaping ([Prescription]) -> Void) {
+        print("Fetching prescriptions for doctorId: \(doctorId)")
+        db.collection("prescriptions")
+            .whereField("doctorId", isEqualTo: doctorId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching doctor prescriptions: \(error.localizedDescription)")
+                    self.errorMessage = "Error al cargar recetas"
+                    completion([])
+                    return
+                }
+
+                let prescriptions = snapshot?.documents.compactMap { doc -> Prescription? in
+                    let data = doc.data()
+                    guard let patientId = data["patientId"] as? String,
+                          let patientName = data["patientName"] as? String,
+                          let doctorId = data["doctorId"] as? String,
+                          let doctorName = data["doctorName"] as? String,
+                          let date = data["date"] as? String,
+                          let hour = data["hour"] as? String,
+                          let diagnosis = data["diagnosis"] as? String,
+                          let prescription = data["prescription"] as? String,
+                          let createdAt = data["createdAt"] as? Timestamp else {
+                        return nil
+                    }
+                    return Prescription(
+                        id: doc.documentID,
+                        patientId: patientId,
+                        patientName: patientName,
+                        doctorId: doctorId,
+                        doctorName: doctorName,
+                        date: date,
+                        hour: hour,
+                        diagnosis: diagnosis,
+                        prescription: prescription,
+                        createdAt: createdAt
+                    )
+                } ?? []
+                completion(prescriptions.sorted { $0.createdAt.dateValue() > $1.createdAt.dateValue() })
+                print("Fetched \(prescriptions.count) prescriptions for doctorId: \(doctorId)")
+            }
+    }
 }

@@ -53,16 +53,16 @@ struct PatientsView: View {
                 } else {
                     VStack(spacing: 16) {
                         // Header
-                        VStack(spacing: 0) {
+                        HStack {
+                            Image(systemName: "person.3.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 24))
                             Text("Pacientes")
-                                .font(.system(size: 28, weight: .medium, design: .rounded))
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                                 .foregroundColor(.black)
-                            Text("Revisa el historial de cada paciente")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(.gray)
                         }
-                        .padding(.top, 35)
-                        .padding(.bottom, 16)
+                        .padding(.top, 8)
+                        .padding(.horizontal, 16)
 
                         // Search Bar
                         HStack {
@@ -200,7 +200,7 @@ struct PatientRowView: View {
     var body: some View {
         HStack {
             Image(systemName: "person.fill")
-                .foregroundColor(colors.blue)
+                .foregroundColor(colors.green)
                 .font(.system(size: 16))
             Text(appointment.patientName)
                 .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -217,7 +217,7 @@ struct PatientRowView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .background(colors.blue)
+                .background(colors.green)
                 .foregroundColor(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -252,109 +252,268 @@ struct PatientDetailView: View {
                 .ignoresSafeArea()
             VStack(spacing: 16) {
                 // Header
-                VStack(spacing: 0) {
+                HStack {
                     Image(systemName: "person.crop.circle.fill")
                         .foregroundColor(colors.blue)
                         .font(.system(size: 24))
                     Text("Historial Médico")
-                        .font(.system(size: 28, weight: .medium, design: .rounded))
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(.black)
-                    Text("Revisa los detalles de cada paciente")
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(.gray)
                 }
-                .padding(.top, 35)
-                .padding(.bottom, 16)
+                .padding(.top, 8)
+                .padding(.horizontal, 16)
 
                 if isLoading {
                     ProgressView()
                         .tint(colors.blue)
                         .padding()
                 } else if let history = medicalHistory {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Image(systemName: "person.fill")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Nombre: \(appointment.patientName)")
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(.black)
+                    GeometryReader { geometry in
+                        ScrollView {
+                            LazyVGrid(
+                                columns: [
+                                    GridItem(.flexible(), spacing: 12),
+                                    GridItem(.flexible(), spacing: 12)
+                                ],
+                                spacing: 12
+                            ) {
+                                // Nombre
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "person.fill")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Nombre")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text(appointment.patientName)
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Edad
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "calendar")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Edad")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text("\(history["age"] as? Int ?? 0) años")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Género
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "person")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Género")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text(history["gender"] as? String ?? "No especificado")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Peso
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "scalemass")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Peso")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text("\(String(format: "%.1f", history["weight"] as? Double ?? 0.0)) kg")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Altura
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "ruler")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Altura")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text("\(String(format: "%.1f", history["height"] as? Double ?? 0.0)) cm")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Tipo de sangre
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "drop.fill")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Tipo de sangre")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text(history["bloodType"] as? String ?? "No especificado")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Dieta
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "fork.knife")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Dieta")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text(history["diet"] as? String ?? "No especificada")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Ejercicio
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "figure.walk")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Ejercicio")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text(history["exercise"] as? String ?? "No especificado")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                                // Alergias
+                                VStack {
+                                    HStack {
+                                        Image(systemName: "allergens")
+                                            .foregroundColor(colors.blue)
+                                            .font(.system(size: 16))
+                                        Text("Alergias")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.black)
+                                        Spacer()
+                                    }
+                                    Text(history["allergies"] as? String ?? "Ninguna")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.black)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .frame(width: geometry.size.width / 2 - 20, alignment: .leading)
+                                .background(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
                             }
-                            HStack {
-                                Image(systemName: "calendar")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Edad: \(history["age"] as? Int ?? 0) años")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "person")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Género: \(history["gender"] as? String ?? "No especificado")")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "scalemass")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Peso: \(String(format: "%.1f", history["weight"] as? Double ?? 0.0)) kg")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "ruler")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Altura: \(String(format: "%.1f", history["height"] as? Double ?? 0.0)) cm")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "drop.fill")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Tipo de sangre: \(history["bloodType"] as? String ?? "No especificado")")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "fork.knife")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Dieta: \(history["diet"] as? String ?? "No especificada")")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "figure.walk")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Ejercicio: \(history["exercise"] as? String ?? "No especificado")")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
-                            HStack {
-                                Image(systemName: "allergens")
-                                    .foregroundColor(colors.blue)
-                                    .font(.system(size: 16))
-                                Text("Alergias: \(history["allergies"] as? String ?? "Ninguna")")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.black)
-                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                         }
-                        .padding(12)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
-                        )
-                        .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
-                        .padding(.horizontal, 16)
                     }
                 } else {
                     VStack(spacing: 8) {
