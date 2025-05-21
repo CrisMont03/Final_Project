@@ -695,4 +695,26 @@ class AuthViewModel: ObservableObject {
                 }
             }
         }
+    
+    func fetchPatientMedicalHistory(patientName: String, completion: @escaping ([String: Any]?) -> Void) {
+        print("Fetching medical history for patientName: \(patientName)")
+        db.collection("patients")
+            .whereField("name", isEqualTo: patientName)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching patient: \(error.localizedDescription)")
+                    self.errorMessage = "Error al cargar datos del paciente"
+                    completion(nil)
+                    return
+                }
+                guard let document = snapshot?.documents.first else {
+                    print("No patient found for patientName: \(patientName)")
+                    completion(nil)
+                    return
+                }
+                let data = document.data()
+                print("Patient medical history fetched: \(data)")
+                completion(data)
+            }
+    }
 }
