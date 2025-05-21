@@ -23,7 +23,6 @@ struct PrescriptionsDoctorView: View {
         background: Color(hex: "F5F6F9")
     )
 
-    // Computed property to filter prescriptions based on search text
     private var filteredPrescriptions: [Prescription] {
         if searchText.isEmpty {
             return prescriptions
@@ -42,70 +41,97 @@ struct PrescriptionsDoctorView: View {
                     .ignoresSafeArea()
 
                 if !authViewModel.userIsLoggedIn || !authViewModel.isDoctor {
-                    VStack {
-                        Text("Acceso restringido")
-                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                    VStack(spacing: 12) {
+                        Image(systemName: "lock.fill")
                             .foregroundColor(colors.red)
-                        Text("Esta vista es solo para médicos autenticados.")
-                            .font(.system(size: 16, weight: .light, design: .rounded))
-                            .foregroundColor(.black)
+                            .font(.system(size: 24))
+                        Text("Acceso restringido")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(colors.red)
+                        Text("Solo para médicos autenticados")
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(.black.opacity(0.7))
                     }
                 } else {
                     VStack(spacing: 16) {
-                        // Search Bar
-                        TextField(
-                            "Buscar por paciente o diagnóstico...",
-                            text: $searchText,
-                            prompt: Text("Buscar").foregroundColor(.black.opacity(0.5))
-                        )
-                        .foregroundColor(.black)
-                        .padding()
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.black.opacity(0.2), lineWidth: 1)
-                        )
-                        .padding(.horizontal)
-                        .autocapitalization(.none)
+                        // Header
+                        VStack(spacing: 0) {
+                            Text("Diagnósticos")
+                                .font(.system(size: 28, weight: .medium, design: .rounded))
+                                .foregroundColor(.black)
+                            Text("Recetas médicas de los pacientes")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.top, 35)
+                        .padding(.bottom, 16)
 
-                        // Title
-                        Text("Mis Recetas")
-                            .font(.system(size: 28, weight: .semibold, design: .rounded))
+                        // Search Bar
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            TextField(
+                                "",
+                                text: $searchText,
+                                prompt: Text("Paciente o diagnóstico").foregroundColor(.black.opacity(0.5))
+                            )
                             .foregroundColor(.black)
-                            .padding(.top, 8)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
 
                         // Error Message
                         if !errorMessage.isEmpty || !authViewModel.errorMessage.isEmpty {
-                            Text(errorMessage.isEmpty ? authViewModel.errorMessage : errorMessage)
-                                .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(colors.red)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(colors.red)
+                                    .font(.system(size: 16))
+                                Text(errorMessage.isEmpty ? authViewModel.errorMessage : errorMessage)
+                                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                                    .foregroundColor(colors.red)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                         }
 
                         // Prescriptions List
                         if isLoading {
-                            ProgressView("Cargando recetas...")
-                                .foregroundColor(.black)
+                            ProgressView()
+                                .tint(colors.blue)
                                 .padding()
                         } else if filteredPrescriptions.isEmpty {
-                            Text(searchText.isEmpty ? "No hay recetas registradas" : "No se encontraron recetas")
-                                .font(.system(size: 16, weight: .light, design: .rounded))
-                                .foregroundColor(.black.opacity(0.7))
-                                .padding()
+                            VStack(spacing: 8) {
+                                Image(systemName: "doc.text.fill")
+                                    .foregroundColor(.black.opacity(0.5))
+                                    .font(.system(size: 24))
+                                Text(searchText.isEmpty ? "No hay recetas" : "No se encontraron recetas")
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.black.opacity(0.7))
+                            }
+                            .padding(.top, 20)
                         } else {
                             ScrollView {
-                                LazyVStack(spacing: 12) {
+                                VStack(spacing: 12) {
                                     ForEach(filteredPrescriptions) { prescription in
                                         PrescriptionRowView(prescription: prescription)
-                                            .padding(.horizontal)
+                                            .padding(.horizontal, 16)
                                     }
                                 }
-                                .padding(.vertical)
+                                .padding(.vertical, 8)
                             }
                         }
+
+                        Spacer()
                     }
+                    .padding(.top, 1)
                 }
             }
             .navigationBarHidden(true)
@@ -126,7 +152,6 @@ struct PrescriptionsDoctorView: View {
         }
     }
 
-    // Fetch prescriptions from AuthViewModel
     private func fetchPrescriptions() {
         guard let doctorId = authViewModel.currentUserId else {
             errorMessage = "No se pudo obtener el ID del médico"
@@ -156,7 +181,6 @@ struct PrescriptionsDoctorView: View {
     }
 }
 
-// Row view for each prescription
 struct PrescriptionRowView: View {
     let prescription: Prescription
     private let colors = (
@@ -168,14 +192,14 @@ struct PrescriptionRowView: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 8) {
+            Image(systemName: "doc.text.fill")
+                .foregroundColor(colors.green)
+                .font(.system(size: 16))
+            VStack(alignment: .leading, spacing: 4) {
                 Text(prescription.patientName)
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(.black)
                 Text("Diagnóstico: \(prescription.diagnosis)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.black.opacity(0.7))
-                Text("Fecha: \(prescription.date)")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundColor(.black.opacity(0.7))
             }
@@ -183,26 +207,29 @@ struct PrescriptionRowView: View {
             NavigationLink {
                 PrescriptionDetailView(prescription: prescription)
             } label: {
-                Text("Ver más")
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
-                    .background(colors.blue)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                HStack {
+                    Text("Ver más")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14))
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(colors.green)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
-        .padding()
+        .padding(12)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.black.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
         )
     }
 }
 
-// Detailed view for each prescription
 struct PrescriptionDetailView: View {
     let prescription: Prescription
     private let colors = (
@@ -216,56 +243,163 @@ struct PrescriptionDetailView: View {
         ZStack {
             colors.background
                 .ignoresSafeArea()
-            ScrollView {
-                VStack(spacing: 24) {
-                    Text("Detalles de la Receta")
-                        .font(.system(size: 28, weight: .semibold, design: .rounded))
+            VStack(spacing: 16) {
+                // Header
+                Image(systemName: "doc.text.fill")
+                    .foregroundColor(colors.blue)
+                    .font(.system(size: 20))
+                    .padding(.top, 35)
+                VStack(spacing: 0) {
+                    Text("Detalles")
+                        .font(.system(size: 28, weight: .medium, design: .rounded))
                         .foregroundColor(.black)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Paciente: \(prescription.patientName)")
-                            .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("ID del Paciente: \(prescription.patientId)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("Médico: \(prescription.doctorName)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("ID del Médico: \(prescription.doctorId)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("Fecha: \(prescription.date)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("Hora: \(prescription.hour)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("Diagnóstico: \(prescription.diagnosis)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("Receta: \(prescription.prescription)")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                        Text("Creado el: \(dateFormatter.string(from: prescription.createdAt.dateValue()))")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.black.opacity(0.2), lineWidth: 1)
-                    )
-                    Spacer()
+                    Text("Observa los detalles específicos de la receta")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(.gray)
                 }
-                .padding(.horizontal)
+                .padding(.bottom, 16)
+
+                ScrollView {
+                    VStack(spacing: 12) {
+                        // Paciente
+                        HStack {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Paciente: \(prescription.patientName)")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+
+
+                        // Médico
+                        HStack {
+                            Image(systemName: "stethoscope")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Médico: \(prescription.doctorName)")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+
+
+                        // Fecha
+                        HStack {
+                            Image(systemName: "calendar")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Fecha: \(prescription.date)")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+
+                        // Hora
+                        HStack {
+                            Image(systemName: "clock")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Hora: \(prescription.hour)")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+
+                        // Diagnóstico
+                        HStack {
+                            Image(systemName: "cross.case.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Diagnóstico: \(prescription.diagnosis)")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+
+                        // Receta
+                        HStack {
+                            Image(systemName: "pills.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Receta: \(prescription.prescription)")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+
+                        // Creado el
+                        HStack {
+                            Image(systemName: "clock.fill")
+                                .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
+                            Text("Creado el: \(dateFormatter.string(from: prescription.createdAt.dateValue()))")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.black)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(colors.blue.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+                Spacer()
             }
-        }
-        .navigationBarTitle("", displayMode: .inline)
-        .navigationBarBackButtonHidden(false)
-        .onAppear {
-            print("PrescriptionDetailView appeared for prescription ID: \(prescription.id)")
+            .padding(.top, 1)
+            .navigationBarTitle("", displayMode: .inline)
+            .navigationBarBackButtonHidden(false)
+            .onAppear {
+                print("PrescriptionDetailView appeared for prescription ID: \(prescription.id)")
+            }
         }
     }
 

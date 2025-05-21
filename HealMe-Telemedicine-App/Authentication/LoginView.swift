@@ -25,8 +25,13 @@ struct LoginView: View {
             ZStack {
                 colors.background
                     .ignoresSafeArea()
-
+            
                 VStack(alignment: .center, spacing: 24) {
+                    // Imagen (Logo)
+                    Image("Logo") // Asegúrate de que "Logo" esté en Assets.xcassets
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100, height: 100)
                     VStack(alignment: .center, spacing: 5) {
                         Text("Bienvenido")
                             .font(.system(size: 32, weight: .semibold, design: .rounded))

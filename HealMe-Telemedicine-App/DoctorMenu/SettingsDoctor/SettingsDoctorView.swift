@@ -2,7 +2,7 @@
 //  SettingsDoctorView.swift
 //  HealMe-Telemedicine-App
 //
-//  Created by Cristian Montiel García on 19/05/25.
+//  Created by Cristian Montiel García on 17/05/25.
 //
 
 import SwiftUI
@@ -20,26 +20,98 @@ struct SettingsDoctorView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Ajustes")
-                .font(.system(size: 32, weight: .semibold, design: .rounded))
-                .foregroundColor(.primary)
+            VStack(spacing: 0) {
+                Text("Ajustes")
+                    .font(.system(size: 28, weight: .medium, design: .rounded))
+                    .foregroundColor(.black)
+                Text("Configura tu cuenta y preferencias:")
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                    .foregroundColor(.gray)
+            }
+            .padding(.top, 35)
+            .padding(.bottom, 14)
             
-            Text("Configura tu cuenta y preferencias")
-                .font(.system(size: 16, weight: .light, design: .rounded))
-                .foregroundColor(.primary)
-            
-            Button(action: {
-                try? Auth.auth().signOut()
-            }) {
-                Text("Cerrar Sesión")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+            // Buttons
+            VStack(spacing: 12) {
+                // Edit Profile Button
+                Button(action: {
+                    // Implementar acción para editar perfil
+                }) {
+                    HStack {
+                        Image(systemName: "person.crop.circle.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                        Text("Editar Perfil")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(colors.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                }
+                
+                // Change Password Button
+                Button(action: {
+                    // Implementar acción para cambiar contraseña
+                }) {
+                    HStack {
+                        Image(systemName: "lock.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                        Text("Cambiar Contraseña")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(colors.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                }
+                
+                // Technical Support Button
+                Button(action: {
+                    // Implementar acción para soporte técnico
+                }) {
+                    HStack {
+                        Image(systemName: "questionmark.circle.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                        Text("Soporte Técnico")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(colors.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                }
+                
+                // Sign Out Button
+                Button(action: {
+                    try? Auth.auth().signOut()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.right.circle.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                        Text("Cerrar Sesión")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(colors.red)
-                    .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: .gray.opacity(0.2), radius: 4, x: 0, y: 2)
+                }
             }
             .padding(.horizontal, 24)
+            
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(colors.background)
@@ -53,3 +125,4 @@ struct SettingsDoctorView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+
