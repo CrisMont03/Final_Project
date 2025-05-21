@@ -20,6 +20,8 @@ struct AppointmentsDoctorView: View {
     @State private var errorMessage: String = ""
     @State private var selectedVideoCallAppointment: AppointmentDoctor?
     @State private var channelName: String?
+    @State private var showDiagnosisModal: Bool = false // Estado para el modal
+    @State private var completedAppointment: AppointmentDoctor? // Cita completada
 
     private let colors = (
         red: Color(hex: "D40035"),
@@ -66,20 +68,22 @@ struct AppointmentsDoctorView: View {
                                     AppointmentCardView(appointment: appointment, onJoinVideoCall: {
                                         guard let doctorId = authViewModel.currentUserId else {
                                             errorMessage = "No se pudo obtener el ID del médico"
+                                            print("No doctorId available")
                                             return
                                         }
-                                        authViewModel.fetchPatientAppointmentId(
+                                        authViewModel.fetchChannelName(
                                             doctorId: doctorId,
                                             date: appointment.date,
-                                            hour: appointment.hour
-                                        ) { appointmentId in
-                                            if let appointmentId = appointmentId {
+                                            hour: appointment.hour,
+                                            patientName: appointment.patientName
+                                        ) { channelName in
+                                            if let channelName = channelName {
                                                 selectedVideoCallAppointment = appointment
-                                                channelName = "healme_\(appointmentId)"
-                                                print("Joining video call for appointment: \(appointment), channelName: \(channelName ?? "nil")")
+                                                self.channelName = channelName
+                                                print("Joining video call for appointment: \(appointment), channelName: \(channelName)")
                                             } else {
-                                                errorMessage = "No se pudo encontrar la cita del paciente"
-                                                print("Failed to fetch patient appointment ID")
+                                                errorMessage = "No se pudo encontrar el canal de la videollamada"
+                                                print("Failed to fetch channelName")
                                             }
                                         }
                                     })
@@ -95,11 +99,34 @@ struct AppointmentsDoctorView: View {
             .navigationBarHidden(true)
             .navigationDestination(isPresented: Binding(
                 get: { selectedVideoCallAppointment != nil && channelName != nil },
-                set: { if !$0 { selectedVideoCallAppointment = nil; channelName = nil } }
+                set: { if !$0 {
+                    if let completed = selectedVideoCallAppointment {
+                        completedAppointment = completed
+                        showDiagnosisModal = true
+                    }
+                    selectedVideoCallAppointment = nil
+                    channelName = nil
+                } }
             )) {
                 if let appointment = selectedVideoCallAppointment, let channelName = channelName {
-                    VideoCallRoomDoctorView(appointment: appointment, channelName: channelName)
-                        .environmentObject(authViewModel)
+                    VideoCallRoomDoctorView(
+                        channelName: channelName,
+                        appointment: appointment,
+                        onCallEnded: {
+                            completedAppointment = appointment
+                            showDiagnosisModal = true
+                        }
+                    )
+                    .environmentObject(authViewModel)
+                }
+            }
+            .sheet(isPresented: $showDiagnosisModal) {
+                if let appointment = completedAppointment {
+                    DiagnosisFormView(
+                        appointment: appointment,
+                        authViewModel: authViewModel,
+                        onDismiss: { showDiagnosisModal = false }
+                    )
                 }
             }
             .onAppear {
@@ -113,7 +140,8 @@ struct AppointmentsDoctorView: View {
         let onJoinVideoCall: () -> Void
         private let colors = (
             blue: Color(hex: "007AFE"),
-            background: Color(hex: "F5F6F9")
+            background: Color(hex: "F5F6F9"),
+            green: Color(hex: "28A745")
         )
 
         var body: some View {

@@ -339,3 +339,4 @@ struct RegisterMedicalHistoryView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+

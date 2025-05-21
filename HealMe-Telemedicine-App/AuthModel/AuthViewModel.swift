@@ -9,6 +9,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import Foundation
 import FirebaseCore
+import UserNotifications // Import for notifications
 
 class AuthViewModel: ObservableObject {
     @Published var errorMessage: String = ""
@@ -125,6 +126,17 @@ class AuthViewModel: ObservableObject {
             }
             print("Sign-in successful for email: \(email)")
             self.errorMessage = ""
+        }
+    }
+    
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+            userIsLoggedIn = false
+            isPatientRegistrationComplete = false
+            // Resetear otras propiedades si es necesario
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
         }
     }
 
@@ -514,14 +526,11 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func fetchPatientAppointmentId(doctorId: String, date: String, hour: String, completion: @escaping (String?) -> Void) {
-        print("Fetching patient appointment ID for doctorId: \(doctorId), date: \(date), hour: \(hour)")
+    func fetchPatientAppointmentId(doctorId: String, date: String, hour: String, patientName: String, completion: @escaping (String?) -> Void) {
+        print("Fetching patient appointment ID for doctorId: \(doctorId), date: \(date), hour: \(hour), patientName: \(patientName)")
+        
         db.collection("patients")
-            .whereField("appointments", arrayContains: [
-                "doctorId": doctorId,
-                "date": date,
-                "hour": hour
-            ])
+            .whereField("name", isEqualTo: patientName)
             .getDocuments { (snapshot: QuerySnapshot?, error: Error?) in
                 if let error = error {
                     print("Error fetching patient appointment: \(error.localizedDescription)")
@@ -529,37 +538,226 @@ class AuthViewModel: ObservableObject {
                     return
                 }
                 
-                guard let documents = snapshot?.documents, !documents.isEmpty,
-                      let patientData = documents.first?.data(),
-                      let appointmentsData = patientData["appointments"] as? [[String: Any]] else {
-                    print("No matching patient appointment found")
+                guard let documents = snapshot?.documents, !documents.isEmpty else {
+                    print("No patient documents found for patientName: \(patientName)")
+                    self.db.collection("patients").getDocuments { (allSnapshot, allError) in
+                        if let allError = allError {
+                            print("Error fetching all patients: \(allError.localizedDescription)")
+                        } else if let allDocs = allSnapshot?.documents {
+                            print("All patient documents: \(allDocs.map { ($0.documentID, $0.data()) })")
+                        }
+                    }
                     completion(nil)
                     return
                 }
                 
-                if let matchingAppointment = appointmentsData.first(where: { appt in
-                    appt["doctorId"] as? String == doctorId &&
-                    appt["date"] as? String == date &&
-                    appt["hour"] as? String == hour
-                }) {
-                    do {
-                        let jsonData = try JSONSerialization.data(withJSONObject: [matchingAppointment])
-                        let appointments = try JSONDecoder().decode([Appointment].self, from: jsonData)
-                        if let appointment = appointments.first {
-                            print("Found patient appointment ID: \(appointment.id.uuidString)")
-                            completion(appointment.id.uuidString)
-                        } else {
-                            print("Failed to decode appointment ID")
-                            completion(nil)
+                print("Found \(documents.count) patient documents for patientName: \(patientName)")
+                for document in documents {
+                    let patientId = document.documentID
+                    let data = document.data()
+                    print("Patient ID: \(patientId), Data: \(data)")
+                    
+                    if let appointmentsData = data["appointments"] as? [[String: Any]],
+                       let matchingAppointment = appointmentsData.first(where: { appt in
+                           appt["doctorId"] as? String == doctorId &&
+                           appt["date"] as? String == date &&
+                           appt["hour"] as? String == hour
+                       }) {
+                        do {
+                            let jsonData = try JSONSerialization.data(withJSONObject: [matchingAppointment])
+                            let appointments = try JSONDecoder().decode([Appointment].self, from: jsonData)
+                            if let appointment = appointments.first {
+                                print("Found patient appointment ID: \(appointment.id.uuidString)")
+                                completion(appointment.id.uuidString)
+                                return
+                            }
+                        } catch {
+                            print("Error decoding patient appointment: \(error.localizedDescription)")
                         }
-                    } catch {
-                        print("Error decoding patient appointment: \(error.localizedDescription)")
-                        completion(nil)
                     }
-                } else {
-                    print("No matching appointment in patient data")
-                    completion(nil)
                 }
+                
+                print("No matching appointment found in patient documents")
+                completion(nil)
+            }
+    }
+    
+    func fetchChannelName(doctorId: String, date: String, hour: String, patientName: String, completion: @escaping (String?) -> Void) {
+        print("Fetching channelName for doctorId: \(doctorId), date: \(date), hour: \(hour), patientName: \(patientName)")
+        
+        db.collection("active_calls")
+            .whereField("doctorId", isEqualTo: doctorId)
+            .whereField("date", isEqualTo: date)
+            .whereField("hour", isEqualTo: hour)
+            .whereField("patientName", isEqualTo: patientName)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching channelName: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let document = snapshot?.documents.first,
+                      let channelName = document.data()["channelName"] as? String else {
+                    print("No active call found for doctorId: \(doctorId), date: \(date), hour: \(hour), patientName: \(patientName)")
+                    completion(nil)
+                    return
+                }
+                
+                print("Found channelName: \(channelName)")
+                completion(channelName)
+            }
+    }
+    
+    func fetchPatientPrescriptions(patientId: String, completion: @escaping ([Prescription]) -> Void) {
+            print("Fetching prescriptions for patientId: \(patientId)")
+            db.collection("prescriptions")
+                .whereField("patientId", isEqualTo: patientId)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        print("Error fetching prescriptions: \(error.localizedDescription)")
+                        completion([])
+                        return
+                    }
+
+                    let prescriptions = snapshot?.documents.compactMap { doc -> Prescription? in
+                        let data = doc.data()
+                        guard let patientId = data["patientId"] as? String,
+                              let patientName = data["patientName"] as? String,
+                              let doctorId = data["doctorId"] as? String,
+                              let doctorName = data["doctorName"] as? String,
+                              let date = data["date"] as? String,
+                              let hour = data["hour"] as? String,
+                              let diagnosis = data["diagnosis"] as? String,
+                              let prescription = data["prescription"] as? String,
+                              let createdAt = data["createdAt"] as? Timestamp else {
+                            return nil
+                        }
+                        return Prescription(
+                            id: doc.documentID,
+                            patientId: patientId,
+                            patientName: patientName,
+                            doctorId: doctorId,
+                            doctorName: doctorName,
+                            date: date,
+                            hour: hour,
+                            diagnosis: diagnosis,
+                            prescription: prescription,
+                            createdAt: createdAt
+                        )
+                    } ?? []
+                    completion(prescriptions.sorted { $0.createdAt.dateValue() > $1.createdAt.dateValue() })
+                }
+        }
+
+        func fetchPatientNotifications(patientId: String, completion: @escaping ([Notification]) -> Void) {
+            print("Fetching notifications for patientId: \(patientId)")
+            db.collection("notifications")
+                .whereField("patientId", isEqualTo: patientId)
+                .whereField("read", isEqualTo: false)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        print("Error fetching notifications: \(error.localizedDescription)")
+                        completion([])
+                        return
+                    }
+
+                    let notifications = snapshot?.documents.compactMap { doc -> Notification? in
+                        let data = doc.data()
+                        guard let patientId = data["patientId"] as? String,
+                              let message = data["message"] as? String,
+                              let createdAt = data["createdAt"] as? Timestamp,
+                              let read = data["read"] as? Bool else {
+                            return nil
+                        }
+                        return Notification(
+                            id: doc.documentID,
+                            patientId: patientId,
+                            message: message,
+                            createdAt: createdAt,
+                            read: read
+                        )
+                    } ?? []
+                    completion(notifications.sorted { $0.createdAt.dateValue() > $1.createdAt.dateValue() })
+                }
+        }
+
+        func markNotificationAsRead(notificationId: String, completion: @escaping (Bool) -> Void) {
+            print("Marking notification as read: \(notificationId)")
+            db.collection("notifications").document(notificationId).updateData([
+                "read": true
+            ]) { error in
+                if let error = error {
+                    print("Error marking notification as read: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    completion(true)
+                }
+            }
+        }
+    
+    func fetchPatientMedicalHistory(patientName: String, completion: @escaping ([String: Any]?) -> Void) {
+        print("Fetching medical history for patientName: \(patientName)")
+        db.collection("patients")
+            .whereField("name", isEqualTo: patientName)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching patient: \(error.localizedDescription)")
+                    self.errorMessage = "Error al cargar datos del paciente"
+                    completion(nil)
+                    return
+                }
+                guard let document = snapshot?.documents.first else {
+                    print("No patient found for patientName: \(patientName)")
+                    completion(nil)
+                    return
+                }
+                let data = document.data()
+                print("Patient medical history fetched: \(data)")
+                completion(data)
+            }
+    }
+    
+    func fetchDoctorPrescriptions(doctorId: String, completion: @escaping ([Prescription]) -> Void) {
+        print("Fetching prescriptions for doctorId: \(doctorId)")
+        db.collection("prescriptions")
+            .whereField("doctorId", isEqualTo: doctorId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching doctor prescriptions: \(error.localizedDescription)")
+                    self.errorMessage = "Error al cargar recetas"
+                    completion([])
+                    return
+                }
+
+                let prescriptions = snapshot?.documents.compactMap { doc -> Prescription? in
+                    let data = doc.data()
+                    guard let patientId = data["patientId"] as? String,
+                          let patientName = data["patientName"] as? String,
+                          let doctorId = data["doctorId"] as? String,
+                          let doctorName = data["doctorName"] as? String,
+                          let date = data["date"] as? String,
+                          let hour = data["hour"] as? String,
+                          let diagnosis = data["diagnosis"] as? String,
+                          let prescription = data["prescription"] as? String,
+                          let createdAt = data["createdAt"] as? Timestamp else {
+                        return nil
+                    }
+                    return Prescription(
+                        id: doc.documentID,
+                        patientId: patientId,
+                        patientName: patientName,
+                        doctorId: doctorId,
+                        doctorName: doctorName,
+                        date: date,
+                        hour: hour,
+                        diagnosis: diagnosis,
+                        prescription: prescription,
+                        createdAt: createdAt
+                    )
+                } ?? []
+                completion(prescriptions.sorted { $0.createdAt.dateValue() > $1.createdAt.dateValue() })
+                print("Fetched \(prescriptions.count) prescriptions for doctorId: \(doctorId)")
             }
     }
 }

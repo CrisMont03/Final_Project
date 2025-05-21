@@ -231,3 +231,4 @@ struct AppointmentsView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+
