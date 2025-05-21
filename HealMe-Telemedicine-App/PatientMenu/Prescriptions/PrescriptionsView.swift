@@ -27,7 +27,8 @@ struct PrescriptionsView: View {
                 colors.background
                     .ignoresSafeArea()
 
-                VStack {
+                VStack(spacing: 16) {
+                    // Header
                     VStack(spacing: 0) {
                         Text("Mis Recetas")
                             .font(.system(size: 28, weight: .medium, design: .rounded))
@@ -36,21 +37,29 @@ struct PrescriptionsView: View {
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(.gray)
                     }
-                    .padding(.top, 15)
-                    .padding(.bottom, 12)
+                    .padding(.top, 8) // Reducido para minimizar espacio superior
+                    .padding(.bottom, 8)
 
+                    // Error Message
                     if !errorMessage.isEmpty {
-                        Text(errorMessage)
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(colors.red)
-                            .padding(.horizontal)
-                            .padding(.bottom, 8)
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(colors.red)
+                                .font(.system(size: 16))
+                            Text(errorMessage)
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(colors.red)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                     }
 
+                    // Notifications
                     if !notifications.isEmpty {
                         HStack {
                             Image(systemName: "bell.fill")
                                 .foregroundColor(colors.blue)
+                                .font(.system(size: 16))
                             Text("Tienes \(notifications.count) notificación(es) nueva(s)")
                                 .font(.system(size: 16, weight: .medium, design: .rounded))
                                 .foregroundColor(.black)
@@ -63,6 +72,7 @@ struct PrescriptionsView: View {
                         .padding(.horizontal, 16)
                     }
 
+                    // Prescriptions List
                     if prescriptions.isEmpty {
                         Text("No tienes recetas disponibles")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
@@ -81,6 +91,7 @@ struct PrescriptionsView: View {
 
                     Spacer()
                 }
+                .padding(.top, 1) // Mínimo padding para evitar espacio extra
             }
             .navigationBarHidden(true)
             .onAppear {
@@ -106,7 +117,7 @@ struct PrescriptionsView: View {
                         .font(.system(size: 18, weight: .medium, design: .rounded))
                         .foregroundColor(.black)
                 }
-                VStack(spacing: 0) {
+                VStack(spacing: 4) {
                     Text("Fecha: \(prescription.date) - \(prescription.hour)")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.blue)
@@ -126,6 +137,7 @@ struct PrescriptionsView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.gray.opacity(0.1), lineWidth: 1)
             )
+            .shadow(color: .gray.opacity(0.1), radius: 4, x: 0, y: 2)
         }
     }
 

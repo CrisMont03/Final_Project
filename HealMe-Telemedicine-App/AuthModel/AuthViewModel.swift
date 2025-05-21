@@ -128,6 +128,17 @@ class AuthViewModel: ObservableObject {
             self.errorMessage = ""
         }
     }
+    
+    func signOut() {
+        do {
+            try Auth.auth().signOut()
+            userIsLoggedIn = false
+            isPatientRegistrationComplete = false
+            // Resetear otras propiedades si es necesario
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
+        }
+    }
 
     func signUpPatient(email: String, password: String, name: String, completion: @escaping (Bool) -> Void) {
         print("Attempting to sign up patient with email: \(email), name: \(name)")

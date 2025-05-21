@@ -164,3 +164,4 @@ struct RegisterView_Previews: PreviewProvider {
             .environmentObject(AuthViewModel())
     }
 }
+
