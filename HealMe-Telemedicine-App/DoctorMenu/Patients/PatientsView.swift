@@ -53,16 +53,16 @@ struct PatientsView: View {
                 } else {
                     VStack(spacing: 16) {
                         // Header
-                        HStack {
-                            Image(systemName: "person.3.fill")
-                                .foregroundColor(colors.blue)
-                                .font(.system(size: 24))
+                        VStack(spacing: 0) {
                             Text("Pacientes")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .font(.system(size: 28, weight: .medium, design: .rounded))
                                 .foregroundColor(.black)
+                            Text("Revisa a tus pacientes y su historial")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.gray)
                         }
-                        .padding(.top, 8)
-                        .padding(.horizontal, 16)
+                        .padding(.top, 35)
+                        .padding(.bottom, 16)
 
                         // Search Bar
                         HStack {
@@ -252,16 +252,19 @@ struct PatientDetailView: View {
                 .ignoresSafeArea()
             VStack(spacing: 16) {
                 // Header
-                HStack {
-                    Image(systemName: "person.crop.circle.fill")
-                        .foregroundColor(colors.blue)
-                        .font(.system(size: 24))
+                Image(systemName: "person.crop.circle.fill")
+                    .foregroundColor(colors.blue)
+                    .font(.system(size: 24))
+                    .padding(.top, 35)
+                VStack(spacing: 0) {
                     Text("Historial Médico")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: 28, weight: .medium, design: .rounded))
                         .foregroundColor(.black)
+                    Text("Obten información médica del paciente")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(.gray)
                 }
-                .padding(.top, 8)
-                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
 
                 if isLoading {
                     ProgressView()
