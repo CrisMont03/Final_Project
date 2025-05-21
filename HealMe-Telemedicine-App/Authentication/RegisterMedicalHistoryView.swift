@@ -305,6 +305,7 @@ struct RegisterMedicalHistoryView: View {
                             allergies: allergies
                         ) { success in
                             if success {
+                                authViewModel.signOut()
                                 isSaved = true
                             } else {
                                 errorMessage = "Error al guardar los datos"
@@ -324,7 +325,7 @@ struct RegisterMedicalHistoryView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
                 .navigationDestination(isPresented: $isSaved) {
-                    PatientMenuView()
+                    LoginView()
                         .environmentObject(authViewModel)
                 }
             }
